@@ -1,0 +1,6 @@
+8 error TypeError: Cannot read property 'replace' of null
+8 error     at /usr/local/lib/node_modules/lerna/node_modules/@lerna/package-graph/index.js:65:49
+8 error     at Array.forEach (<anonymous>)
+8 error     at /usr/local/lib/node_modules/lerna/node_modules/@lerna/package-graph/index.js:60:38
+8 error     at Map.forEach (<anonymous>)
+8 error     at new PackageGraph (/usr/local/lib/node_modules/lerna/node_modules/@lerna/package-graph/index.js:49:10)
