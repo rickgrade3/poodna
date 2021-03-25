@@ -1,4 +1,5 @@
 import { useHistory } from "react-router-dom";
+import { Button } from "poodna-design-system";
 import { useAppContext } from "../App";
 
 export const RoomCreate = () => {
@@ -8,14 +9,14 @@ export const RoomCreate = () => {
     <>
       <div>
         {app.userId}
-        <button
+        <Button
           onClick={async () => {
             const roomId = await app.gun?.createRoom();
             history.push(`/room/${roomId}`);
           }}
         >
           สร้างห้อง
-        </button>
+        </Button>
       </div>
     </>
   );
