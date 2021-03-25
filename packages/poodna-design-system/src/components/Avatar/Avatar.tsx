@@ -85,7 +85,7 @@ export default (props: AvatarProps) => {
         )}
       </div>
       {props.label && (
-        <div css={[tw`text-center`]}>
+        <div css={[tw`text-center`, props.active ? tw`text-purple-500` : ""]}>
           <Typography size="text_sm" variant="normal">
             {props.label}
           </Typography>
