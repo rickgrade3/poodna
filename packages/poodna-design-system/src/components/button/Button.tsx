@@ -28,11 +28,12 @@ export enum ButtonRoundedEnum {
 type ButtonRounded = keyof typeof ButtonRoundedEnum;
 
 export interface ButtonProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   color?: string;
   size?: ButtonSize;
   variant?: ButtonVariant;
   rounded?: ButtonRounded;
+  icon?: React.ReactNode;
   loading?: boolean;
   focus?: boolean;
   full?: boolean;
@@ -55,6 +56,7 @@ const StyleButton = styled.button<ButtonProps>(
       //PRIMARY
       variant === "primary"
         ? tw`
+          border
           bg-purple-600          
           border-none
           text-white
@@ -80,6 +82,7 @@ const StyleButton = styled.button<ButtonProps>(
       variant === "ghost"
         ? tw`
         border-purple-600
+        border
         text-purple-600
         bg-transparent
       `
@@ -110,6 +113,7 @@ const StyleButton = styled.button<ButtonProps>(
       //GHOST_DIM
       variant === "ghost_dim"
         ? tw`
+        border
         border-gray-300
         text-gray-600
         bg-transparent
@@ -117,6 +121,8 @@ const StyleButton = styled.button<ButtonProps>(
         : "",
       variant === "ghost_dim" && (loading || focus)
         ? tw`
+          border
+          border-transparent
           bg-purple-50
           border-purple-400
           text-purple-900          
@@ -141,6 +147,8 @@ const StyleButton = styled.button<ButtonProps>(
       //DIM
       variant === "dim"
         ? tw`
+        border
+          border-transparent
         bg-purple-50
         text-purple-600
         
@@ -171,6 +179,8 @@ const StyleButton = styled.button<ButtonProps>(
       //TEXT
       variant === "text"
         ? tw`
+        border
+          border-transparent
         bg-transparent
         text-purple-600
         border-transparent
@@ -195,6 +205,8 @@ const StyleButton = styled.button<ButtonProps>(
       //TEXT_GREY
       variant === "text_gray"
         ? tw`
+        border
+          border-transparent
         bg-transparent
         text-gray-600
         border-transparent
@@ -204,6 +216,8 @@ const StyleButton = styled.button<ButtonProps>(
         : "",
       variant === "text_gray" && (loading || focus)
         ? tw`
+            border
+            border-transparent
             bg-gray-200
             text-gray-600
         `
@@ -248,7 +262,11 @@ export default (props: ButtonProps) => {
       <div css={tw`flex items-center justify-center`}>
         <div
           css={[
-            props.loading ? tw`w-7 opacity-100` : tw`w-0 opacity-0`,
+            props.loading
+              ? props.children
+                ? tw`w-7 opacity-100`
+                : `opacity-100`
+              : tw`w-0 opacity-0`,
             tw`transition-all ease-in-out duration-300 overflow-hidden`,
           ]}
         >
@@ -256,6 +274,9 @@ export default (props: ButtonProps) => {
             css={[props.loading ? tw`animate-spin` : tw``, tw`fill-current`]}
           />
         </div>
+        {props.icon && !props.loading && (
+          <div css={[props.children ? tw`w-7` : tw``]}>{props.icon}</div>
+        )}
         {props.children}
       </div>
     </StyleButton>
