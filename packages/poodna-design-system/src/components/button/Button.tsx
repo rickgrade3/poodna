@@ -1,15 +1,18 @@
 import React from "react";
-import styled from "styled-components";
+import tw, { css, styled, theme } from "twin.macro";
 
-const StyleButton = styled.button`
+const StyleButton = styled.button(({ color }) => [
+  `
   height: 35px;
-  background: ${(props) => (props.color ? props.color : "#ffffff")};
+  background: ${color || "#ffffff"};
   border-radius: 25px;
   color: #ffffff !important;
-  border-color: ${(props) => (props.color ? props.color : "#ffffff")};
+  border-color: ${color || "#ffffff"};
   border: 1px solid;
   padding: 0 15px;
-`;
+`,
+  tw`bg-red-50`,
+]);
 
 export interface ButtonProps {
   color?: string;

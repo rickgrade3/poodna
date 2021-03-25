@@ -6,5 +6,12 @@ lerna bootstrap --hoist
 lerna add bannana --scope=fruit
 lerna add poodna-type --scope=poodna-backend
 lerna add poodna-design-system --scope=poodna-frontend
+lerna add tailwindcss --scope=poodna-design-system
+lerna add twin.macro --scope=poodna-design-system
+lerna add autoprefixer --scope=poodna-design-system
+lerna add babel-plugin-macros --scope=poodna-design-system
+lerna add postcss-cli --scope=poodna-design-system
+lerna add @types/react --scope=poodna-design-system
+
 #Init new
 lerna init
