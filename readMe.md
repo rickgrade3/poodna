@@ -4,6 +4,6 @@ lerna bootstrap --hoist
 
 #Add bannana project to fruit
 lerna add bannana --scope=fruit
-
+lerna add poodna-type --scope=poodna-backend
 #Init new
 lerna init

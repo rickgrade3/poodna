@@ -1,15 +1,7 @@
 import { io, Socket } from "socket.io-client";
 import _ from "lodash";
 import { resolve } from "path";
-const SEND_DATA = "send-data";
-enum AvailableEvents {
-  offer = "offer",
-  answer = "answer",
-  clearPC = "clearPC",
-  ice_candidate = "ice_candidate",
-  ice_candidate_reverse = "ice_candidate_reverse",
-}
-type AvailableEventsStr = keyof typeof AvailableEvents;
+import { SEND_DATA, AvailableEvents, AvailableEventsStr } from "poodna-type/rp";
 interface HopAttr {
   hopKey: string;
   fromId: string;

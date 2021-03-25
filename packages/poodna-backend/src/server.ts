@@ -1,6 +1,6 @@
 import express from "express";
 import { ExpressPeerServer } from "peer";
-
+import { AvailableEventsStr, SEND_DATA } from "poodna-type/rp";
 var app = express();
 
 app.get("/", (req, res, next) => res.send("Hello world!"));
@@ -12,19 +12,14 @@ const io = require("socket.io")(server, {
     origin: "*",
   },
 });
-enum AvailableEvents {
-  offer = "offer",
-  answer = "answer",
-  ice_candidate = "ice_candidate",
-}
-type AvailableEventsStr = keyof typeof AvailableEvents;
+
 io.on("connection", (socket: any) => {
   console.log("a user connected", socket.handshake.query.userId);
 
   socket.join(socket.handshake.query.userId);
 
   socket.on(
-    "send-data",
+    SEND_DATA,
     (data: {
       toUserId: string;
       fromUserId: string;
