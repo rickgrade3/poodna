@@ -6,7 +6,7 @@
     "typescript": "^4.1.5"
   },
   "scripts": {
-    "dev": "lerna run dev"
+    "dev": "lerna run dev --parallel --stream --no-bail"
   },
   "version": "1.0.0",
   "main": "index.js",
