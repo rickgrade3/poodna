@@ -7,10 +7,10 @@ export enum AvailableEvents {
   ice_candidate_reverse = "ice_candidate_reverse",
 }
 export type AvailableEventsStr = keyof typeof AvailableEvents;
-export type SocketData {
+export type SocketData = {
   toUserId: string;
   fromUserId: string;
   event: AvailableEventsStr;
   clearPC: boolean;
   payload: any;
-}
+};
