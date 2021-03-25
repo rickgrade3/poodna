@@ -18,6 +18,7 @@ export const Primary = Template.bind({});
 
 Primary.args = {
   children: "Test",
+  loading: true,
   checked: true,
   chevron: true,
   icon: "icon",
