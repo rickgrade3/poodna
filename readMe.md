@@ -4,3 +4,6 @@ lerna bootstrap --hoist
 
 #Add bannana project to fruit
 lerna add bannana --scope=fruit
+
+#Init new
+lerna init
