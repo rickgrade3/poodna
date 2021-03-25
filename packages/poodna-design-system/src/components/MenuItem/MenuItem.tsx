@@ -2,6 +2,7 @@ import React from "react";
 import tw, { css, styled, theme } from "twin.macro";
 import { ReactComponent as Check } from "../../icons/solid/check.svg";
 import { ReactComponent as Chevron } from "../../icons/solid/chevron-right.svg";
+import Ink from "react-ink";
 export interface MenuItemProps {
   before?: React.ReactNode;
   icon?: React.ReactNode;
@@ -19,7 +20,7 @@ export default (props: MenuItemProps) => {
       {...props}
       css={[
         tw`
-        flex items-center justify-between py-4 
+        flex items-center justify-between py-6 
         bg-transparent
         text-gray-600
         border-transparent
@@ -29,6 +30,7 @@ export default (props: MenuItemProps) => {
         active:bg-gray-200
         active:text-gray-600
         transition  duration-300 ease-in-out cursor-pointer	
+        relative
     `,
         `
         :not(:first-child) {
@@ -37,6 +39,7 @@ export default (props: MenuItemProps) => {
     `,
       ]}
     >
+      <Ink />
       <div css={tw`flex items-center justify-start space-x-2`}>
         {[
           props.before && <div>{props.before}</div>,
@@ -59,7 +62,7 @@ export default (props: MenuItemProps) => {
       </div>
       <div css={tw`flex items-center justify-end space-x-2`}>
         {[
-          props.label && <div>{props.label}</div>,
+          props.label && <div css={tw`opacity-30`}>{props.label}</div>,
           props.after && <div>{props.after}</div>,
           props.checked && (
             <div>

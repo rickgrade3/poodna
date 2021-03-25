@@ -1,7 +1,7 @@
 import React from "react";
 import tw, { css, styled, theme } from "twin.macro";
 import { ReactComponent as Loading } from "../../icons/solid/spinner.svg";
-
+import Ink from "react-ink";
 export enum ButtonVariantEnum {
   primary = "primary",
   ghost = "ghost",
@@ -236,7 +236,7 @@ const StyleButton = styled.button<ButtonProps>(
       rounded === "full" ? tw`rounded-full` : "",
       rounded === "lg" ? tw`rounded-3xl` : "",
       rounded === "md" ? tw`rounded-md` : "",
-      tw`transition  duration-300 ease-in-out cursor-pointer	`,
+      tw`transition  duration-300 ease-in-out cursor-pointer	relative`,
     ];
   }
 );
@@ -244,6 +244,7 @@ const StyleButton = styled.button<ButtonProps>(
 export default (props: ButtonProps) => {
   return (
     <StyleButton {...props}>
+      <Ink />
       <div css={tw`flex items-center justify-center`}>
         <div
           css={[
