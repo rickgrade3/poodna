@@ -15,5 +15,5 @@
     "noEmit": true,
     "jsx": "react"
   },
-  "include": ["src", "twin.d.ts"]
+  "include": ["src", "tailwind.d.ts", "images.d.ts"]
 }

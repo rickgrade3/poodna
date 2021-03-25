@@ -16,5 +16,9 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["src", "../poodna-design-system/src/twin.d.ts"]
+  "include": [
+    "src",
+    "../poodna-design-system/src/tailwind.d.ts",
+    "../poodna-design-system/src/images.d.ts"
+  ]
 }

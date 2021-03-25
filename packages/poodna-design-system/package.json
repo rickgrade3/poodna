@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@storybook/react": "^6.1.21",
+    "@svgr/webpack": "^5.5.0",
     "@tailwindcss/postcss7-compat": "^2.0.4",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
@@ -27,6 +28,11 @@
   "main": "src/",
   "scripts": {
     "dev": "start-storybook -p 9009 -s public"
+  },
+  "babelMacros": {
+    "twin": {
+      "preset": "styled-components"
+    }
   },
   "eslintConfig": {
     "extends": [

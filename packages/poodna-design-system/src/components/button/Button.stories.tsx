@@ -38,6 +38,16 @@ export default {
         type: "boolean",
       },
     },
+    loading: {
+      control: {
+        type: "boolean",
+      },
+    },
+    focus: {
+      control: {
+        type: "boolean",
+      },
+    },
   },
 } as Meta;
 //👇 We create a “template” of how args map to rendering
@@ -52,4 +62,6 @@ Primary.args = {
   size: "md",
   full: false,
   disabled: false,
+  loading: false,
+  focus: false,
 };
