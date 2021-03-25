@@ -117,8 +117,12 @@ export default (props: InputProps) => {
           <div
             css={[
               isFocus || _v
-                ? tw`
-                  -translate-y-4 transform text-purple-700 text-xs font-medium`
+                ? isFocus
+                  ? tw`
+                    -translate-y-4 transform text-purple-700  text-xs font-medium`
+                  : tw`
+                    -translate-y-4 transform text-gray-400 text-xs font-medium
+                  `
                 : tw`
                   opacity-20 transform
               `,
@@ -146,7 +150,7 @@ export default (props: InputProps) => {
           icon={
             <Close
               css={tw`
-              text-gray-600
+              text-purple-600
               fill-current
               
           `}
