@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.build.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+
+    "paths": {
+      "@poodna/*": ["packages/*/src"]
+    },
+    "lib": ["ES2020", "esnext", "es6"],
+    "jsx": "react",
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  }
+}

@@ -1,0 +1,37 @@
+#https://gist.github.com/maxkostinevich/9672966565aeb749d41e49673be4e7fa ///
+name: Deploy packages/db on master branch
+on:
+  push:
+    paths:
+      - "schema.prisma"
+      - "package.json"
+      - "packages/db/**"
+      - ".github/workflows/deployment-db.yaml"
+    branches:
+      - master
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [14.x]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install Node
+        run: npm install && npm run bootstrap
+      - name: Build Base Module
+        run: cd packages/db && npm run build && cd ../util && npm run build
+      - name: Create env file
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          echo "DATABASE_URL=$DATABASE_URL" > ./packages/db/.env && cat ./packages/db/.env
+      - name: Migrate DB
+        run: cd ./packages/db/ && npm run migrate
+      - name: Seed DB
+        run: cd ./packages/db/ && npm run seedData

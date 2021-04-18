@@ -1,0 +1,95 @@
+{
+  "name": "@poodna/frontend-kds",
+  "version": "1.0.1",
+  "private": true,
+  "main": "src/index",
+  "scripts": {
+    "dev": "craco start",
+    "build": "CI=false craco build",
+    "test": "craco test",
+    "eject": "craco eject"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.1.5",
+    "@tailwindcss/postcss7-compat": "^2.0.4",
+    "@types/lodash": "^4.14.168",
+    "@types/moment": "^2.13.0",
+    "@types/styled-components": "^5.1.9",
+    "autoprefixer": "^9.8.6",
+    "css-loader": "^5.2.0",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.1",
+    "postcss": "^7.0.35",
+    "postcss-cli": "^8.3.1",
+    "postcss-import": "^14.0.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-icons": "^4.2.0",
+    "react-ink": "^6.4.0",
+    "react-minimal-pie-chart": "^8.2.0",
+    "styled-components": "^5.2.3",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.4",
+    "twin.macro": "^2.3.2",
+    "@craco/craco": "^6.1.1",
+    "@emotion/babel-preset-css-prop": "^11.2.0",
+    "@material-ui/core": "^4.11.3",
+    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/react": "^11.1.0",
+    "@testing-library/user-event": "^12.1.10",
+    "@poodna/datatype": "^1.0.0",
+    "@poodna/design-system": "^1.0.0",
+    "@poodna/util": "^1.0.1",
+    "@types/axios": "^0.14.0",
+    "@types/babel__core": "^7.1.14",
+    "@types/eslint-scope": "^3.7.0",
+    "@types/jest": "^26.0.15",
+    "@types/jquery": "^3.5.5",
+    "@types/node": "^14.14.37",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "@types/react-router-dom": "^5.1.7",
+    "@types/simple-peer": "^9.6.2",
+    "@types/uuid": "^8.3.0",
+    "axios": "^0.21.1",
+    "craco": "^0.0.3",
+    "craco-babel-loader": "^0.1.4",
+    "db": "^1.0.0",
+    "gun": "^0.2020.520",
+    "jquery": "^3.5.1",
+    "mobx": "^6.1.8",
+    "mobx-react-lite": "^3.2.0",
+    "notistack": "^1.0.5",
+    "peerjs": "^1.3.1",
+    "react-router-dom": "^5.2.0",
+    "react-scripts": "^4.0.3",
+    "simple-peer": "^9.9.3",
+    "socket.io-client": "^3.1.2",
+    "typescript": "^4.1.2",
+    "uuid": "^8.3.2",
+    "web-vitals": "^1.0.1",
+    "websocket": "^1.0.33"
+  },
+  "babelMacros": {
+    "twin": {
+      "preset": "styled-components"
+    }
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

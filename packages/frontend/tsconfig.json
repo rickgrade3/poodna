@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": false,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": false,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "baseUrl": "./",
+    "jsx": "react-jsx",
+    "target": "es5",
+    "types": ["@emotion/react/types/css-prop"],
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "skipLibCheck": true,
+    "esModuleInterop": true
+  },
+  "include": [
+    "./react-app-env.d.ts",
+    "../design-system/src/tailwind.d.ts",
+    "../design-system/src/images.d.ts",
+    "src"
+  ]
+}

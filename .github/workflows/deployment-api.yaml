@@ -1,0 +1,42 @@
+#https://gist.github.com/maxkostinevich/9672966565aeb749d41e49673be4e7fa ///
+#Deploy to Lambda
+name: Deploy packages/api on master branch
+on:
+  push:
+    paths:
+      - "schema.prisma"
+      - "package.json"
+      - "packages/api/**"
+      - "packages/db/**"
+      - ".github/workflows/deployment-api.yaml"
+    branches:
+      - master
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [14.x]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Create env file
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          echo "DATABASE_URL=$DATABASE_URL" > ./packages/api/.env && cat ./packages/api/.env &&
+          echo "DATABASE_URL=$DATABASE_URL" > ./packages/db/.env && cat ./packages/db/.env
+      - name: Install Node
+        run: npm install && npm run bootstrap
+      - name: Build Base Module
+        run: cd packages/db && npm run build && cd ../util && npm run build
+      - name: Install Serverless Framework
+        run: npm install -g serverless
+      - name: Serverless AWS authentication
+        run: sls config credentials --provider aws --key ${{ secrets.AWS_ACCESS_KEY_ID }} --secret ${{ secrets.AWS_SECRET_ACCESS_KEY }} --profile lambda -o
+      - name: Deploy Lambda functions
+        run: cd ./packages/api/ && npm run deploy

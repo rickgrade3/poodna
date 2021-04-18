@@ -1,15 +1,23 @@
 {
-  "name": "poodna-project",
+  "name": "@poodna/project",
+  "description": "Template for setting up a TypeScript monorepo",
   "private": true,
-  "devDependencies": {
-    "lerna": "^4.0.0",
-    "typescript": "^4.1.5"
-  },
   "scripts": {
-    "dev": "lerna run dev --parallel --stream --no-bail"
+    "bootstrap": "lerna bootstrap --no-ci",
+    "docs": "doctoc --title '**Table of content**' README.md",
+    "clean": "lerna run clean",
+    "build": "lerna run build",
+    "pub": "lerna publish",
+    "test": "lerna run test"
   },
-  "version": "1.0.0",
-  "main": "index.js",
-  "author": "Anupat Insuvanno <rickgrade3@gmail.com>",
-  "license": "MIT"
+  "dependencies": {
+    "@types/node": "^14.14.37"
+  },
+  "devDependencies": {
+    "doctoc": "~2.0.0",
+    "eslint": "~7.21.0",
+    "lerna": "~3.22.0",
+    "prisma": "2.20.1",
+    "typescript": "~4.2.0"
+  }
 }

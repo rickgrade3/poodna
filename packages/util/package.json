@@ -1,0 +1,33 @@
+{
+  "name": "@poodna/util",
+  "version": "1.0.1",
+  "main": "src/index",
+  "types": "src/index",
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "build": "npm run clean && npm run compile",
+    "clean": "rimraf -rf ./dist",
+    "compile": "tsc -p tsconfig.build.json",
+    "dev": "tsc -w -p tsconfig.build.json"
+  },
+  "dependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/babel__core": "^7.1.14",
+    "@types/eslint-scope": "^3.7.0",
+    "@types/lodash": "^4.14.168",
+    "@types/moment": "^2.13.0",
+    "@types/node": "^14.14.37",
+    "axios": "^0.21.1",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^8.2.0",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.1",
+    "prisma": "2.20.1",
+    "rimraf": "~3.0.2",
+    "ts-node": "^9.1.1",
+    "typescript": "~4.2.0"
+  }
+}

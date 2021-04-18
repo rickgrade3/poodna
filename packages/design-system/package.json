@@ -1,0 +1,58 @@
+{
+  "name": "@poodna/design-system",
+  "version": "1.0.1",
+  "main": "src/",
+  "private": true,
+  "scripts": {
+    "dev": "start-storybook -p 9009 -s public"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.1.5",
+    "@storybook/addon-postcss": "^2.0.0",
+    "@storybook/react": "^6.2.1",
+    "@svgr/webpack": "^5.5.0",
+    "@tailwindcss/postcss7-compat": "^2.0.4",
+    "@poodna/util": "^1.0.1",
+    "@types/lodash": "^4.14.168",
+    "@types/moment": "^2.13.0",
+    "@types/styled-components": "^5.1.9",
+    "autoprefixer": "^9.8.6",
+    "css-loader": "^5.2.0",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.1",
+    "postcss": "^7.0.35",
+    "postcss-cli": "^8.3.1",
+    "postcss-import": "^14.0.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-icons": "^4.2.0",
+    "react-ink": "^6.4.0",
+    "react-minimal-pie-chart": "^8.2.0",
+    "styled-components": "^5.2.3",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.4",
+    "twin.macro": "^2.3.2"
+  },
+  "babelMacros": {
+    "twin": {
+      "preset": "styled-components"
+    }
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
