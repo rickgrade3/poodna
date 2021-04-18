@@ -14,7 +14,7 @@ export interface SwitchProps {
   size?: ButtonSize;
 }
 
-export default ({ tone = "DARK", size, ...props }: SwitchProps) => {
+export default ({ tone = "LIGHT", size, ...props }: SwitchProps) => {
   return (
     <X
       css={[

@@ -42,7 +42,7 @@ const StyleInputContainer = styled.div<Omit<InputProps, "onChange" | "value">>(
   }
 );
 
-export default ({ tone = "DARK", ...props }: InputProps) => {
+export default ({ tone = "LIGHT", ...props }: InputProps) => {
   const { onChange, value, ...containerProps } = props;
   const [controlled] = useState(!!props.value);
   const [isFocus, setFocus] = useState(false);

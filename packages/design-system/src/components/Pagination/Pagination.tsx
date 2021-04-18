@@ -15,7 +15,7 @@ export interface PaginationProps {
   tone?: Theme;
 }
 
-export default ({ tone = "DARK", ...props }: PaginationProps) => {
+export default ({ tone = "LIGHT", ...props }: PaginationProps) => {
   const totalPage = Math.ceil(props.totalItem / props.pageCount);
   const numbers = Array.from(Array(totalPage).keys());
   const groups = _.chunk(numbers, props.pageCount);

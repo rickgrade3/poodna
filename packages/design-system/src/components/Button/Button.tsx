@@ -469,7 +469,7 @@ const StyleButton = styled.button<ButtonProps>(
   }
 );
 
-export default ({ tone = "DARK", onClick, ...props }: ButtonProps) => {
+export default ({ tone = "LIGHT", onClick, ...props }: ButtonProps) => {
   const [internalLoading, setInternalLoading] = useState(props.loading);
   const _loading = props.autoloading ? internalLoading : props.loading;
   return (
