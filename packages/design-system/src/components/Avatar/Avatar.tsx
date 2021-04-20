@@ -21,7 +21,7 @@ export interface AvatarProps {
   text?: string;
   left?: string;
   background?: string;
-  size: AvatarSize;
+  size?: AvatarSize;
   status?: AvatarStatus;
   label?: string;
   active?: boolean;
@@ -34,7 +34,7 @@ export default (props: AvatarProps) => {
         <div
           css={[
             props.size === "lg" ? tw`w-20 h-20` : "",
-            props.size === "md" ? tw`w-14 h-14` : "",
+            props.size === "md" || !props.size ? tw`w-14 h-14` : "",
             props.size === "sm" ? tw`w-6 h-6` : "",
             props.background ? `background:${props.background};` : "",
             tw`relative overflow-hidden bg-cover bg-no-repeat bg-center rounded-full`,

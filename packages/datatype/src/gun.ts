@@ -1,39 +1,29 @@
+export interface User {
+  online: boolean;
+  id: string;
+  created_at?: number;
+  avatar: string;
+  name: string;
+}
 export interface ChatRoom {
   id: string;
-  ownerId: string;
+  title: string;
   maximum: number;
-  userCount: number;
-  users: {
-    [userId: string]: {
-      online: boolean;
-      id: string;
-      created_at?: number;
-    };
+  ownerId: string;
+  auto_pick_broadcaster: boolean;
+  broadcasters: {
+    [userId: string]: User;
   };
-  bradcasters: {
-    [userId: string]: {
-      id: string;
-      created_at?: number;
-    };
-  };
-  mainLoopUsers: {
-    [userId: string]: {
-      id: string;
-      created_at?: number;
-    };
+  mainloops: {
+    [userId: string]: User;
   };
   outsiders: {
-    [userId: string]: {
-      id: string;
-      created_at?: number;
-    };
+    [userId: string]: User;
   };
 } //
 export interface AppDB {
   users: {
-    [userId: string]: {
-      id: string;
-    };
+    [userId: string]: User;
   };
   rooms: {
     [roomId: string]: ChatRoom;

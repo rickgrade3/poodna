@@ -1,101 +1,66 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { ReactChildren, ReactElement, useEffect } from "react";
 import "./App.css";
+import { SnackbarProvider, useSnackbar } from "notistack";
+import { BrowserRouter as Router, useHistory } from "react-router-dom";
+import { GlobalOverlay, Loading } from "@poodna/design-system";
+import Routes from "./Routes";
+import { useOverlay } from "@poodna/design-system/src/components/utility/GlobalOverlay";
+import { appStore, gunStore } from "./stores/appStore";
+import { observer } from "mobx-react-lite";
 
-import { v4 as uuidv4 } from "uuid";
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
-import { Room } from "./pages/Room";
-import { RoomCreate } from "./pages/RoomCreate";
-import gun from "gun/gun";
-import { GunManager, RoomManager } from "./services/Gun";
-
-import { RPeer } from "./services/RP";
-
-const useAppContextState = () => {
-  const [userId, setUserId] = useState<string | null>();
-
-  const [gun, setGun] = useState<GunManager | null>();
-  const [room, setCurrentRoom] = useState<RoomManager | null>();
-  const [role, setRole] = useState<
-    "UNKNOWN" | "MAINLOOP_USER" | "BROADCASTER" | "OUTSIDER"
-  >("UNKNOWN");
-  const [refreshDate, setRefreshDate] = useState<number>(Math.random());
-  const [localStream, setLocalStream] = useState<MediaStream | null>();
-  const refresh = () => {
-    setRefreshDate(Math.random());
-  };
+/*
+  Load Everything
+*/
+const AppLoader = observer((p: { children: ReactElement }) => {
+  //Routing
+  const his = useHistory();
+  //Overlay
+  const ov = useOverlay();
+  //Snackbar
+  const sn = useSnackbar();
   useEffect(() => {
-    if (!userId) {
-      return;
-    }
+    if (his) appStore.set_history(his);
+    appStore.set_dialog_trigger({
+      show: (p) => {
+        ov.showOverlay(p);
+      },
+      hide: (p) => {
+        p.id && ov.hideOverlay(p.id);
+      },
+    });
+    appStore.set_noti_trigger((p) => {
+      const { message, ...x } = p;
+      sn.enqueueSnackbar(p.message, x);
+    });
 
-    const g = new GunManager({ userId });
+    gunStore.load_gun();
+  }, [his, ov, sn]);
 
-    setGun(g);
-  }, [userId]);
-  useEffect(() => {
-    RPeer.initLocalStream().then((v) => setLocalStream(v));
-  }, []);
-
-  useEffect(() => {
-    let uid = localStorage.getItem("userId");
-    if (!uid) {
-      uid = uuidv4();
-      localStorage.setItem("userId", uid);
-      setUserId(uid);
-    } else {
-      setUserId(uid);
-    }
-  }, []);
-  const ready = !!userId && !!localStream && !!gun;
-  return {
-    role,
-    setRole,
-    userId,
-    ready,
-    refresh,
-    setUserId,
-    refreshDate,
-    localStream,
-    room,
-    setCurrentRoom,
-    gun,
-  };
-};
-interface AppContextType extends ReturnType<typeof useAppContextState> {}
-const AppContext = React.createContext<AppContextType | undefined>(undefined);
-export const useAppContext = () => {
-  const app = useContext(AppContext);
-  if (!app) {
-    throw new Error("Need to be inside provider");
+  if (!gunStore.gun || !appStore.history || !appStore.noti_trigger) {
+    return (
+      <>
+        <Loading />
+      </>
+    );
   }
-  return app;
-};
+  return <div>{p.children}</div>;
+});
 const AppInner = () => {
-  const app = useAppContext();
-  if (!app.ready) {
-    return <>Loading</>;
-  }
   return (
     <Router>
-      <Switch>
-        <Route exact path="/">
-          <RoomCreate />
-        </Route>
-        <Route exact path="/room/:roomId">
-          <Room />
-        </Route>
-      </Switch>
+      <SnackbarProvider>
+        <GlobalOverlay>
+          <AppLoader>
+            <Routes />
+          </AppLoader>
+        </GlobalOverlay>
+      </SnackbarProvider>
       <audio autoPlay />
     </Router>
   );
 };
 function App() {
-  const state = useAppContextState();
-  return (
-    <AppContext.Provider value={state}>
-      <AppInner />
-    </AppContext.Provider>
-  );
+  return <AppInner />;
 }
 
 export default App;

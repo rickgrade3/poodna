@@ -3,8 +3,10 @@ import tw, { css, styled, theme } from "twin.macro";
 
 import Ink from "react-ink";
 import { FaCheck, FaChevronRight, FaSpinner } from "react-icons/fa";
+import { Avatar } from "../..";
 export interface MenuItemProps {
   before?: React.ReactNode;
+  avatar?: string;
   icon?: React.ReactNode;
   children?: React.ReactNode;
   label?: string;
@@ -46,6 +48,7 @@ export default (props: MenuItemProps) => {
       <Ink />
       <div css={tw`flex items-center justify-start space-x-2`}>
         {[
+          props.avatar && <Avatar src={props.avatar} />,
           props.before && <div>{props.before}</div>,
           props.icon && (
             <div

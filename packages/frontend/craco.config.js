@@ -37,11 +37,13 @@ module.exports = {
   webpack: {
     alias: {
       react: path.resolve("node_modules/react"),
+      Icon: path.resolve(__dirname, "src/icon.js"),
     },
     plugins: {
       add: [
         new webpack.ProvidePlugin({
           React: "react",
+          Icon: "Icon",
         }),
       ] /* An array of plugins */,
     },

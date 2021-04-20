@@ -1,5 +1,5 @@
 {
-  "name": "@poodna/frontend-kds",
+  "name": "@poodna/frontend",
   "version": "1.0.1",
   "private": true,
   "main": "src/index",

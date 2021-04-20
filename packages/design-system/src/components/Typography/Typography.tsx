@@ -23,25 +23,30 @@ export enum TypoSizeEnum {
 type TypoSize = keyof typeof TypoSizeEnum;
 
 export interface TypographyProps {
-  variant: TypoVariant;
+  variant?: TypoVariant;
   children: React.ReactNode | React.ReactNode[];
-  size: TypoSize;
+  size?: TypoSize;
   className?: string;
 }
 
 export default (props: TypographyProps) => {
+  const v = props.variant || "normal";
   return (
     <div
       className={props.className}
       css={[
         //Weight
-        props.variant === "heading" ? tw`font-extrabold opacity-90` : "",
-        props.variant === "normal" ? tw`font-light opacity-80` : "",
+        v === "heading" ? tw`font-extrabold opacity-90` : "",
+        v === "normal" ? tw`font-light opacity-80` : "",
         //Size
         props.size === "text_xs" ? tw`text-xs` : "",
         props.size === "text_sm" ? tw`text-sm` : "",
-        props.size === "text_base" ? tw`text-base` : "",
-        props.size === "text_lg" ? tw`text-lg` : "",
+        props.size === "text_base" || (!props.size && v === "normal")
+          ? tw`text-base`
+          : "",
+        props.size === "text_lg" || (!props.size && v === "heading")
+          ? tw`text-lg`
+          : "",
         props.size === "text_xl" ? tw`text-xl` : "",
         props.size === "text_2xl" ? tw`text-2xl` : "",
         props.size === "text_3xl" ? tw`text-3xl` : "",
