@@ -35,7 +35,6 @@ const Users = () => {
   return (
     <X>
       {r.mainloop?.list.map((u) => {
-        console.log("md", u);
         return <Avatar src={u.avatar} label={u.name} />;
       })}
     </X>
@@ -43,6 +42,7 @@ const Users = () => {
 };
 const Listeners = () => {
   const r = useRoom();
+  console.log(r.outsider);
   return (
     <X>
       {r.outsider?.list.map((u) => {
@@ -55,6 +55,7 @@ const Inner = () => {
   const r = useRoom();
   useEffect(() => {
     if (r.room?.item?.ownerId !== appStore.user.id) {
+      console.log("Add outsider");
       api.ChatRoom.add_outsider.execute({
         id: r.room?.item.id || "",
         userId: appStore.user.id,

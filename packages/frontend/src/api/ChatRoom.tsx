@@ -117,7 +117,7 @@ export default {
   }),
   list_outsider: APIGen<{ id: string }, { list: User[] }, User>({
     exec: (p, gun) => {
-      return gun.get("rooms").get(p.id).get("outsiders").map();
+      return gun.get("rooms").get(p.id).get("outsiders");
     },
     value: (res, gun, prev) => {
       return {

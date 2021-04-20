@@ -83,3 +83,4 @@ lerna-debug
 lerna-debug.log
 
 build
+packages/backend/db
