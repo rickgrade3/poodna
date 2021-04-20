@@ -43,7 +43,7 @@ export default {
     },
     value: (res, gun, prev) => {
       return {
-        list: [...(prev?.list || []), res as any],
+        list: [...(prev?.list || []), res],
       };
     },
   }),
@@ -54,7 +54,7 @@ export default {
     value: (res, gun, prev) => {
       console.log(res);
       return {
-        list: [...(prev?.list || []), res as any],
+        list: [...(prev?.list || []), res],
       };
     },
   }),
@@ -72,7 +72,7 @@ export default {
     },
     value: (res, gun, prev) => {
       return {
-        list: [...(prev?.list || []), res as any],
+        list: [...(prev?.list || []), res],
       };
     },
   }),
@@ -87,7 +87,7 @@ export default {
     value: (res, gun, prev) => {
       console.log("res", res);
       return {
-        list: [...(prev?.list || []), res as any],
+        list: [...(prev?.list || []), res],
       };
     },
   }),
@@ -101,7 +101,7 @@ export default {
     },
     value: (res, gun, prev) => {
       return {
-        list: [...(prev?.list || []), res as any],
+        list: [...(prev?.list || []), res],
       };
     },
   }),
@@ -121,7 +121,7 @@ export default {
     },
     value: (res, gun, prev) => {
       return {
-        list: [...(prev?.list || []), res as any],
+        list: [...(prev?.list || []), res],
       };
     },
   }),

@@ -3,13 +3,13 @@ import { v4 as uuidv4 } from "uuid";
 import { User } from "@poodna/datatype";
 
 export default {
-  list: APIGen<undefined, { list: User[] }, { [key: string]: User }>({
+  list: APIGen<undefined, { list: User[] }, User>({
     exec: (p, gun) => {
       return gun.get("users");
     },
     value: (res, gun, prev) => {
       return {
-        list: [...(prev?.list || []), res as any],
+        list: [...(prev?.list || []), res],
       };
     },
   }),
