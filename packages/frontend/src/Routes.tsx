@@ -4,7 +4,6 @@ import React, { ReactElement } from "react";
 import { Switch, Route, useHistory } from "react-router-dom";
 import api from "./api";
 import CreateRoom from "./pages/CreateRoom";
-import Dashboard from "./pages/Dashboard";
 import Register from "./pages/Register";
 import Room from "./pages/Room";
 import { appStore } from "./stores/appStore";
@@ -55,17 +54,17 @@ export default () => {
       <Auth>
         <Navbar />
       </Auth>
-      <Route exact path="/">
-        <Auth>
-          <Dashboard />
-        </Auth>
-      </Route>
       <Route exact path="/register">
         <Register />
       </Route>
       <Route exact path="/room/:id">
         <Auth>
           <Room />
+        </Auth>
+      </Route>
+      <Route exact path="/">
+        <Auth>
+          <CreateRoom />
         </Auth>
       </Route>
       <Route exact path="/create_room">
