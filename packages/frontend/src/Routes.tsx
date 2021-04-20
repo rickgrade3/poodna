@@ -9,6 +9,7 @@ import Register from "./pages/Register";
 import Room from "./pages/Room";
 import { appStore } from "./stores/appStore";
 import { observer } from "mobx-react-lite";
+import Navbar from "./components/Navbar";
 const AW = observer(AuthWrapper<User, any>());
 const Auth = (p: { children: ReactElement }) => {
   const router = useHistory();
@@ -51,6 +52,9 @@ const Auth = (p: { children: ReactElement }) => {
 export default () => {
   return (
     <Switch>
+      <Auth>
+        <Navbar />
+      </Auth>
       <Route exact path="/">
         <Auth>
           <Dashboard />
