@@ -15,6 +15,7 @@ export interface LayourBaseProps {
   autoW?: boolean;
   divider?: boolean;
   className?: string;
+  wrap?: boolean;
   style?: any;
   variant?: (
     | "box"
@@ -40,6 +41,7 @@ export const Layout = ({
   py,
   style,
   variant,
+  wrap,
 
   className,
 }: LayourBaseProps) => {
@@ -101,6 +103,7 @@ export const Layout = ({
     >
       <div
         className={[
+          wrap ? "flex-wrap" : "",
           `${d === "x" ? "flex-row" : "flex-col"}`,
           `justify-${justify}`,
           `items-${align}`,

@@ -18,6 +18,9 @@ const Stat = () => {
   const r = useRoom();
   return (
     <X justify="start">
+      <Typography variant="normal">
+        Main Loop : {r.total_mainloop}/{r.room.item.maximum}
+      </Typography>
       <Typography variant="normal">Users : {r.total_users}</Typography>
       <Typography variant="normal">
         Broadcasters : {r.total_broadcasters}
@@ -44,16 +47,28 @@ const Title = () => {
 const Users = () => {
   const r = useRoom();
   return (
-    <X align="center" py={4} justify="start">
-      {r.mainloop?.list.map((u) => {
-        return (
-          <Y className="w-1/4" autoW={true}>
-            <Button size="auto" style={{ padding: "1rem" }} variant="text_gray">
-              <Avatar size="lg" src={u.avatar} label={u.name} />
-            </Button>
-          </Y>
-        );
-      })}
+    <X wrap gap={0} align="center" py={4} justify="start">
+      {Array(r.room.item.maximum)
+        .fill(0)
+        .map((d, i) => {
+          console.log("x");
+          return (
+            <Y className="w-1/4" autoW={true}>
+              <Button
+                size="auto"
+                style={{ padding: "1rem" }}
+                variant="text_gray"
+              >
+                <Avatar
+                  size="lg"
+                  background={"rgba(0,0,0,0.1)"}
+                  src={r.mainloop?.list?.[i]?.avatar || ""}
+                  label={r.mainloop?.list?.[i]?.name || `Slot ${i + 1}`}
+                />
+              </Button>
+            </Y>
+          );
+        })}
     </X>
   );
 };
@@ -61,7 +76,7 @@ const Listeners = () => {
   const r = useRoom();
   console.log(r.outsider);
   return (
-    <X align="center" py={4} justify="start">
+    <X wrap gap={0} align="center" py={4} justify="start">
       {r.outsider?.list.map((u) => {
         return (
           <Y className="w-1/4" autoW={true}>
