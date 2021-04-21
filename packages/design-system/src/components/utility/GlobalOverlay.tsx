@@ -146,39 +146,6 @@ const Drawer = (p: OverlayModel) => {
               },
             })}
           </div>
-          <X
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              boxShadow: "0px 0px 8px #00000061",
-            }}
-            variant={["box", "light", "rounded"]}
-          >
-            <Button
-              onClick={async () => {
-                if (p.onCancel) {
-                  await p.onCancel();
-                }
-                r.hideOverlay(p.id);
-              }}
-              variant="dim"
-              style={{ width: 200 }}
-            >
-              {p.cancelText || "Cancel"}
-            </Button>
-            <Button
-              onClick={async () => {
-                if (p.onSubmit) {
-                  await p.onSubmit();
-                }
-                r.hideOverlay(p.id);
-              }}
-              variant="primary"
-            >
-              {p.submitText || "Submit"}
-            </Button>
-          </X>
         </Y>
       </motion.div>
     </motion.div>
