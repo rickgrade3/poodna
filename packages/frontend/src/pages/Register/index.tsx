@@ -6,11 +6,11 @@ import { appStore } from "src/stores/appStore";
 const apiCall = api.User.create.execute;
 type Fields = Parameters<typeof apiCall>[0];
 
-const { Form: _Form } = Form<Fields>();
+const { Form: F } = Form<Fields>();
 export default () => {
   return (
     <>
-      <_Form
+      <F
         {...{
           initialValue: {
             name: "",

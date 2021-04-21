@@ -44,11 +44,13 @@ const Title = () => {
 const Users = () => {
   const r = useRoom();
   return (
-    <X align="center" p={4} justify="start">
+    <X align="center" py={4} justify="start">
       {r.mainloop?.list.map((u) => {
         return (
           <Y className="w-1/4" autoW={true}>
-            <Avatar size="lg" src={u.avatar} label={u.name} />
+            <Button size="auto" style={{ padding: "1rem" }} variant="text_gray">
+              <Avatar size="lg" src={u.avatar} label={u.name} />
+            </Button>
           </Y>
         );
       })}
@@ -59,7 +61,7 @@ const Listeners = () => {
   const r = useRoom();
   console.log(r.outsider);
   return (
-    <X align="center" p={4} justify="start">
+    <X align="center" py={4} justify="start">
       {r.outsider?.list.map((u) => {
         return (
           <Y className="w-1/4" autoW={true}>
@@ -85,7 +87,7 @@ const Inner = () => {
     return <></>;
   }
   return (
-    <>
+    <Y gap={4}>
       <Y gap={2} justify="start" align="start">
         <Title />
         <Stat />
@@ -119,7 +121,7 @@ const Inner = () => {
         <Listeners />
       </Y>
       <Button icon={<Icons.FaLink />}></Button>
-    </>
+    </Y>
   );
 };
 export default () => {

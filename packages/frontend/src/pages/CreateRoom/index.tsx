@@ -3,11 +3,11 @@ import api from "src/api";
 import { appStore } from "src/stores/appStore";
 const apiCall = api.ChatRoom.create.execute;
 type Fields = Parameters<typeof apiCall>[0];
-const { Form: _Form } = Form<Fields>();
+const { Form: F } = Form<Fields>();
 export default () => {
   return (
     <>
-      <_Form
+      <F
         {...{
           initialValue: {
             title: "",

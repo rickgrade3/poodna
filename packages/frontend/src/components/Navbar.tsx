@@ -16,7 +16,7 @@ export default (p: { children: ReactElement }) => {
         </div>
         <Avatar src={appStore.user.avatar} />
       </X>
-      {p.children}
+      <div>{p.children}</div>
     </Y>
   );
 };

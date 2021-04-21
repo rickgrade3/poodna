@@ -2,11 +2,11 @@ import { Form, Typography } from "@poodna/design-system/src";
 interface Fields {
   braodcasters: string[];
 }
-const { Form: _Form } = Form<Fields>();
+const { Form: F } = Form<Fields>();
 export default () => {
   return (
     <>
-      <_Form
+      <F
         {...{
           initialValue: {
             braodcasters: [],

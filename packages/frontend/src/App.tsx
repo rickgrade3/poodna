@@ -1,4 +1,4 @@
-import React, { ReactChildren, ReactElement, useEffect } from "react";
+import React, { ReactElement, useEffect } from "react";
 import "./App.css";
 import { SnackbarProvider, useSnackbar } from "notistack";
 import { BrowserRouter as Router, useHistory } from "react-router-dom";
