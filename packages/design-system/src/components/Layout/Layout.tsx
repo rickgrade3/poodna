@@ -45,6 +45,7 @@ export const Layout = ({
 }: LayourBaseProps) => {
   return (
     <div
+      style={style}
       css={css`
         ${(variant || []).indexOf("page-wrapper") >= 0
           ? `
@@ -99,7 +100,6 @@ export const Layout = ({
       className={[!autoW ? `w-full` : `w-auto`, `${className}`].join(" ")}
     >
       <div
-        style={style}
         className={[
           `${d === "x" ? "flex-row" : "flex-col"}`,
           `justify-${justify}`,

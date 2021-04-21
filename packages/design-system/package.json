@@ -18,6 +18,7 @@
     "@types/styled-components": "^5.1.9",
     "autoprefixer": "^9.8.6",
     "css-loader": "^5.2.0",
+    "framer-motion": "^4.1.6",
     "lodash": "^4.17.21",
     "mobx": "^6.2.0",
     "moment": "^2.29.1",

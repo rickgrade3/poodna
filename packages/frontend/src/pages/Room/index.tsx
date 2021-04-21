@@ -6,11 +6,12 @@ import {
   X,
   Y,
 } from "@poodna/design-system/src";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useParams } from "react-router";
 import api from "src/api";
 import { Icons } from "src/components/Icons";
 import { appStore } from "src/stores/appStore";
+import BroadcasterSetting from "./BroadcasterSetting";
 import { RoomProviderWrapper, useRoom } from "./RoomProvider";
 
 const Stat = () => {
@@ -47,7 +48,7 @@ const Users = () => {
       {r.mainloop?.list.map((u) => {
         return (
           <Y className="w-1/4" autoW={true}>
-            <Avatar src={u.avatar} label={u.name} />
+            <Avatar size="lg" src={u.avatar} label={u.name} />
           </Y>
         );
       })}
@@ -62,7 +63,7 @@ const Listeners = () => {
       {r.outsider?.list.map((u) => {
         return (
           <Y className="w-1/4" autoW={true}>
-            <Avatar src={u.avatar} label={u.name} />
+            <Avatar size="lg" src={u.avatar} label={u.name} />
           </Y>
         );
       })}
@@ -91,7 +92,19 @@ const Inner = () => {
       </Y>
       <Users />
       <Y divider gap={0}>
-        <MenuItem icon={<Icons.FaBroadcastTower />} chevron>
+        <MenuItem
+          onClick={() => {
+            appStore.openDialog({
+              variant: "DRAWER",
+              title: "Broadcaster Setting",
+              content: ({ back }) => {
+                return <BroadcasterSetting />;
+              },
+            });
+          }}
+          icon={<Icons.FaBroadcastTower />}
+          chevron
+        >
           Broadcaster Setting
         </MenuItem>
         <MenuItem icon={<Icons.FaShare />} chevron>

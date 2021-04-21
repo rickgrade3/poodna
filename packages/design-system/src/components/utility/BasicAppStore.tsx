@@ -138,7 +138,7 @@ export class BasicAppStore<User> {
     this.dialog_trigger = p;
   }
   openDialog(props: OverlayModel) {
-    this.dialog_trigger.show(props);
+    this.dialog_trigger.show({ id: Math.random().toString(), ...props });
   }
   setDialogs = (overlays: OverlayModel[]) => {
     this.overlays = overlays;
