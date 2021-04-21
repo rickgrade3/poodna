@@ -55,6 +55,7 @@ export const Layout = ({
           margin-left:auto;
           margin-right:auto;
           margin-top:3rem;
+          margin-bottom:3rem;
           padding-left:2rem;
           padding-right:2rem;
         `

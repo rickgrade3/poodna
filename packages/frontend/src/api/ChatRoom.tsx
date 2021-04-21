@@ -39,9 +39,24 @@ export default {
   }),
   list: APIGen<undefined, { list: ChatRoom[] }, ChatRoom>({
     exec: (p, gun) => {
-      return gun.get("rooms");
+      return gun.get("rooms").map();
     },
     value: (res, gun, prev) => {
+      return {
+        list: [...(prev?.list || []), res],
+      };
+    },
+  }),
+  list_by_user: APIGen<{ id: string }, { list: ChatRoom[] }, ChatRoom>({
+    exec: (p, gun) => {
+      return gun.get("rooms").map();
+    },
+    value: (res, gun, prev, p) => {
+      if (res.ownerId !== p.id) {
+        return {
+          list: prev?.list || [],
+        };
+      }
       return {
         list: [...(prev?.list || []), res],
       };

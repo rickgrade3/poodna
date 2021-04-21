@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import _ from "lodash";
 import { ChatRoom, AppDB } from "@poodna/datatype";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AlwaysDisallowedType, ArrayAsRecord } from "gun/types/types";
 import { gunStore } from "src/stores/appStore";
 require("gun/lib/load.js");
@@ -25,25 +25,29 @@ export const GUNApiGen = function <
   value: (
     v: GunItem,
     g: typeof gunStore.gun,
-    prevData?: response | undefined
+    prevData?: response | undefined,
+    v2?: request
   ) => response;
 }) {
   const execute = async (p: request) => {
     return await new Promise<response>((resolve) => {
       o.exec(p, gunStore.gun).load?.((v) => {
-        resolve(o.value(v, gunStore.gun));
+        resolve(o.value(v, gunStore.gun, undefined, p));
       });
     });
   };
   const Hook = (p: request) => {
     const [loading, setLoading] = useState<boolean>(false);
+    const vv = useRef<response | undefined>();
     const [data, setData] = useState<response | undefined>();
 
     useEffect(() => {
       setLoading(true);
 
       o.exec(p, gunStore.gun).on((v) => {
-        setData(o.value(v, gunStore.gun, data));
+        let newV = o.value(v, gunStore.gun, vv.current, p);
+        vv.current = newV;
+        setData(newV);
       });
     }, []);
     return {

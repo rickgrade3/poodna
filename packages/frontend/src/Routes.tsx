@@ -9,6 +9,7 @@ import Room from "./pages/Room";
 import { appStore } from "./stores/appStore";
 import { observer } from "mobx-react-lite";
 import Navbar from "./components/Navbar";
+import Dashboard from "./pages/Dashboard";
 const AW = observer(AuthWrapper<User, any>());
 const Auth = (p: { children: ReactElement }) => {
   const router = useHistory();
@@ -75,7 +76,7 @@ export default () => {
         <Route exact path="/">
           <Auth>
             <Navbar>
-              <CreateRoom />
+              <Dashboard />
             </Navbar>
           </Auth>
         </Route>
