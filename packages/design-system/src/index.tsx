@@ -12,6 +12,6 @@ export { default as MenuItem } from "./components/MenuItem/MenuItem";
 export { default as AuthWrapper } from "./components/utility/AuthWrapper";
 export { BasicAppStore } from "./components/utility/BasicAppStore";
 export { default as GlobalOverlay } from "./components/utility/GlobalOverlay";
-export { X, Y, Layout } from "./components/Layout/Layout";
+export { X, Y, Layout, BG } from "./components/Layout/Layout";
 
 //

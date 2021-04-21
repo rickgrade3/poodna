@@ -472,10 +472,11 @@ const StyleButton = styled.button<ButtonProps>(
 export default ({ tone = "LIGHT", onClick, ...props }: ButtonProps) => {
   const [internalLoading, setInternalLoading] = useState(props.loading);
   const _loading = props.autoloading ? internalLoading : props.loading;
+  const full = typeof props.full === "undefined" ? true : false;
   return (
     <StyleButton
       tone={tone}
-      {...props}
+      {...{ ...props, full }}
       onClick={async () => {
         setInternalLoading(true);
         if (onClick) {

@@ -29,7 +29,7 @@ export interface AvatarProps {
 
 export default (props: AvatarProps) => {
   return (
-    <div css={tw`inline-flex flex-col space-y-3`}>
+    <div css={tw`inline-flex flex-col space-y-3 w-auto`}>
       <div css={tw`relative`}>
         <div
           css={[

@@ -16,26 +16,40 @@ import { RoomProviderWrapper, useRoom } from "./RoomProvider";
 const Stat = () => {
   const r = useRoom();
   return (
-    <X>
-      <Typography variant="normal">{r.total_users}</Typography>
-      <Typography variant="normal">{r.total_broadcasters}</Typography>
+    <X justify="start">
+      <Typography variant="normal">Users : {r.total_users}</Typography>
+      <Typography variant="normal">
+        Broadcasters : {r.total_broadcasters}
+      </Typography>
     </X>
   );
 };
 const ListenerHeader = () => {
   const r = useRoom();
-  return <Typography variant="normal">{r.total_users}</Typography>;
+  return (
+    <Typography variant="heading" size="text_xl">
+      Listeners
+    </Typography>
+  );
 };
 const Title = () => {
   const r = useRoom();
-  return <Typography variant="heading">{r.room.item.title}</Typography>;
+  return (
+    <Typography size="text_3xl" variant="heading">
+      {r.room.item.title}
+    </Typography>
+  );
 };
 const Users = () => {
   const r = useRoom();
   return (
-    <X>
+    <X align="center" p={4} justify="start">
       {r.mainloop?.list.map((u) => {
-        return <Avatar src={u.avatar} label={u.name} />;
+        return (
+          <Y className="w-1/4" autoW={true}>
+            <Avatar src={u.avatar} label={u.name} />
+          </Y>
+        );
       })}
     </X>
   );
@@ -44,9 +58,13 @@ const Listeners = () => {
   const r = useRoom();
   console.log(r.outsider);
   return (
-    <X>
+    <X align="center" p={4} justify="start">
       {r.outsider?.list.map((u) => {
-        return <Avatar src={u.avatar} label={u.name} />;
+        return (
+          <Y className="w-1/4" autoW={true}>
+            <Avatar src={u.avatar} label={u.name} />
+          </Y>
+        );
       })}
     </X>
   );
@@ -67,12 +85,14 @@ const Inner = () => {
   }
   return (
     <>
-      <Title />
-      <Stat />
-      <Y divider>
-        <Users />
+      <Y gap={2} justify="start" align="start">
+        <Title />
+        <Stat />
+      </Y>
+      <Users />
+      <Y divider gap={0}>
         <MenuItem icon={<Icons.FaBroadcastTower />} chevron>
-          Broadcaster
+          Broadcaster Setting
         </MenuItem>
         <MenuItem icon={<Icons.FaShare />} chevron>
           Share

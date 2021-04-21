@@ -1,5 +1,5 @@
 import { User } from "@poodna/datatype";
-import { AuthWrapper } from "@poodna/design-system/src";
+import { AuthWrapper, BG, X, Y } from "@poodna/design-system/src";
 import React, { ReactElement } from "react";
 import { Switch, Route, useHistory } from "react-router-dom";
 import api from "./api";
@@ -50,28 +50,36 @@ const Auth = (p: { children: ReactElement }) => {
 };
 export default () => {
   return (
-    <Switch>
-      <Auth>
-        <Navbar />
-      </Auth>
-      <Route exact path="/register">
-        <Register />
-      </Route>
-      <Route exact path="/room/:id">
-        <Auth>
-          <Room />
-        </Auth>
-      </Route>
-      <Route exact path="/">
-        <Auth>
-          <CreateRoom />
-        </Auth>
-      </Route>
-      <Route exact path="/create_room">
-        <Auth>
-          <CreateRoom />
-        </Auth>
-      </Route>
-    </Switch>
+    <Y variant={["page-wrapper"]}>
+      <Switch>
+        <Route exact path="/register">
+          <Register />
+        </Route>
+        <Route exact path="/room/:id">
+          <Auth>
+            <>
+              <Navbar>
+                <Room />
+              </Navbar>
+              <BG color="white" />
+            </>
+          </Auth>
+        </Route>
+        <Route exact path="/create_room">
+          <Auth>
+            <Navbar>
+              <CreateRoom />
+            </Navbar>
+          </Auth>
+        </Route>
+        <Route exact path="/">
+          <Auth>
+            <Navbar>
+              <CreateRoom />
+            </Navbar>
+          </Auth>
+        </Route>
+      </Switch>
+    </Y>
   );
 };

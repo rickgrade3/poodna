@@ -30,6 +30,7 @@ export default () => {
           },
           steps: [
             [
+              "Enter room name",
               {
                 component: "TEXT",
                 label: "Enter room name",
@@ -37,12 +38,14 @@ export default () => {
                 placeholder: "Enter room name",
                 value: async (d) => d.title,
               },
+              "Total user in main loop",
               {
                 component: "NUMBER_SLIDER",
                 label: "Total user in main loop",
                 field: "maximum",
                 value: async (d) => d.maximum,
               },
+              "Auto pick broadcaster",
               {
                 component: "YES_NO",
                 label: "Auto pick broadcaster",

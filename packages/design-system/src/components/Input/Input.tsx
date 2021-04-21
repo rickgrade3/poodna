@@ -43,15 +43,18 @@ const StyleInputContainer = styled.div<Omit<InputProps, "onChange" | "value">>(
 );
 
 export default ({ tone = "LIGHT", ...props }: InputProps) => {
-  const { onChange, value, ...containerProps } = props;
-  const [controlled] = useState(!!props.value);
+  const { onChange, value, full = true, ...containerProps } = props;
+  const [controlled] = useState(
+    typeof props.value !== "undefined" && props.value !== null
+  );
   const [isFocus, setFocus] = useState(false);
   const [_v, setValue] = useState(props.value);
+  const vv = controlled ? props.value : _v;
   return (
-    <StyleInputContainer {...containerProps}>
+    <StyleInputContainer {...{ ...containerProps, full }}>
       <input
         type={props.type || "text"}
-        value={controlled ? props.value : _v}
+        value={vv}
         onChange={(e: any) => {
           setValue(e.target.value);
           if (onChange) onChange(e.target.value);
@@ -146,7 +149,7 @@ export default ({ tone = "LIGHT", ...props }: InputProps) => {
         >
           <div
             css={[
-              isFocus || _v
+              isFocus || vv
                 ? isFocus
                   ? tw`
                     -translate-y-4 transform opacity-100  text-xs font-medium`
@@ -183,6 +186,7 @@ export default ({ tone = "LIGHT", ...props }: InputProps) => {
             absolute
             right-3
             top-1/2 -translate-y-1/2  transform
+            w-auto
         `,
           ]}
           icon={

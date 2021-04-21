@@ -1,13 +1,22 @@
-import { Avatar, X } from "@poodna/design-system/src";
-import React from "react";
+import { Avatar, X, Y } from "@poodna/design-system/src";
+import React, { ReactElement } from "react";
 import { appStore } from "src/stores/appStore";
 import Logo from "./Logo";
 
-export default () => {
+export default (p: { children: ReactElement }) => {
   return (
-    <X>
-      <Logo></Logo>
-      <Avatar src={appStore.user.avatar} />
-    </X>
+    <Y gap={10}>
+      <X justify="between">
+        <div
+          onClick={() => {
+            appStore.push("/");
+          }}
+        >
+          <Logo></Logo>
+        </div>
+        <Avatar src={appStore.user.avatar} />
+      </X>
+      {p.children}
+    </Y>
   );
 };

@@ -24,7 +24,8 @@ export default (p: LoadingProps) => {
         p.size === "xl" ? tw`w-16 h-16` : "",
         p.size === "lg" ? tw`w-14 h-14` : "",
         p.size === "md" ? tw`w-12 h-12` : "",
-        p.size === "sm" ? tw`w-10 h-10` : "",
+        p.size === "sm" || !p.size ? tw`w-10 h-10` : "",
+        tw`mx-auto`,
         tw`animate-spin`,
         tw`fill-current`,
       ]}

@@ -1,12 +1,15 @@
 import { head } from "lodash";
 import React, { ReactElement, useContext, useEffect, useState } from "react";
+import tw, { css, styled, theme } from "twin.macro";
 import { Avatar, Button, MenuItem } from "../..";
 import Input from "../Input/Input";
-import { X, Y } from "../Layout/Layout";
+import { LayourBaseProps, X, Y } from "../Layout/Layout";
 import Typography, { TypographyProps } from "../Typography/Typography";
 type ThenArg<T> = T extends PromiseLike<infer U> ? U : T;
+
 interface Base<F> {
   label?: string;
+  widthPercent?: number;
   placeholder?: string;
   required?: boolean;
   disabed?: (d: F) => boolean;
@@ -80,9 +83,13 @@ type FormButton<F> = {
 
 type FormValidate<F> = (d: F) => boolean;
 type Optional<T, K extends keyof T> = Omit<T, K> & Partial<T>;
-type Header = string | Optional<TypographyProps, "variant" | "size">;
+type Header =
+  | string
+  | Optional<TypographyProps, "variant" | "size">
+  | ReactElement;
 type FormProps<F> = {
   initialValue: F;
+  variant?: LayourBaseProps["variant"];
   ctaFloating?: boolean;
   steps: StepItem<F>[][];
   submit?: FormButton<F>;
@@ -133,6 +140,8 @@ function Form<F>() {
     const c = useForm();
     return (
       <Button
+        size="xl"
+        variant="primary"
         onClick={async () => {
           if (c.submit?.onClick) await c.submit.onClick(c.form);
         }}
@@ -145,6 +154,8 @@ function Form<F>() {
     const c = useForm();
     return (
       <Button
+        size="xl"
+        variant="primary"
         onClick={async () => {
           c.setStep(c.step + 1);
           if (c.next?.onClick) await c.next?.onClick(c.form);
@@ -183,9 +194,10 @@ function Form<F>() {
         });
       }
     }, [_v]);
+
     return (
       <Input
-        label={p.label}
+        label={p.label || p.field?.toString() || ""}
         onChange={(v) => {
           setV(v);
         }}
@@ -206,7 +218,7 @@ function Form<F>() {
         setRd(true);
       });
     }, []);
-    return <>{_v}</>;
+    return <div>{_v}</div>;
   };
   const FormItem_NUMBER_SLIDER_EL = (
     p: FormItem_NUMBER_SLIDER<F> & T_FORM_ContextValue
@@ -229,7 +241,7 @@ function Form<F>() {
       }
     }, [_v]);
     return (
-      <X>
+      <X justify={"start"} py={1} style={{ overflow: "auto" }}>
         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => {
           return (
             <Button
@@ -360,7 +372,7 @@ function Form<F>() {
       }
     }, [_v]);
     return (
-      <Y>
+      <X>
         {AVATARS.map((c) => {
           const actived = c === (_v && _v.value);
           return (
@@ -373,7 +385,7 @@ function Form<F>() {
             </div>
           );
         })}
-      </Y>
+      </X>
     );
   };
   const TForm: React.FC<FormProps<F>> = (p) => {
@@ -382,59 +394,108 @@ function Form<F>() {
     const k = useFormState(p);
     const vv = { ...k, ...pp };
     const _header = headers?.[k.step] || header;
+    let h = <></>;
+    if (_header) {
+      if (typeof _header === "string") {
+        h = (
+          <Typography
+            {...{
+              variant: "heading",
+              size: "text_3xl",
+              ...{ children: _header },
+            }}
+          />
+        );
+      } else if (React.isValidElement(_header)) {
+        h = _header;
+      } else {
+        h = (
+          <Typography
+            {...{
+              variant: "heading",
+              size: "text_3xl",
+              children: _header,
+            }}
+          />
+        );
+      }
+    }
+
     return (
       <TFormContext.Provider value={vv}>
-        {(_header || back) && (
-          <div>
-            {back && <BackButton />}
-            {_header && (
-              <Typography
-                {...{
-                  variant: "heading",
-                  size: "text_2xl",
-                  ...(typeof _header === "string"
-                    ? { children: _header }
-                    : _header),
-                }}
-              />
-            )}
-          </div>
-        )}
-        {children}
-        <Y gap={2}>
-          {steps[k.step] &&
-            steps[k.step].map((s, index) => {
-              let ch = <>TODO</>;
-              if (typeof s === "string") {
-                ch = (
-                  <FormItem_LABEL_EL
-                    {...{
-                      ...{ component: "LABEL", value: async () => s },
-                      ...vv,
-                    }}
-                  />
-                );
-              } else if (s.component === "LABEL") {
-                ch = <FormItem_LABEL_EL {...{ ...s, ...vv }} />;
-              } else if (s.component === "NUMBER_SLIDER") {
-                ch = <FormItem_NUMBER_SLIDER_EL {...{ ...s, ...vv }} />;
-              } else if (s.component === "MULTI_SELECT_ITEM") {
-                ch = <FormItem_MULTI_SELECT_ITEM_EL {...{ ...s, ...vv }} />;
-              } else if (s.component === "YES_NO") {
-                ch = <FormItem_YES_NO_EL {...{ ...s, ...vv }} />;
-              } else if (s.component === "AVATAR_SELCTOR") {
-                ch = <FormItem_AVATAR_SELCTOR_EL {...{ ...s, ...vv }} />;
-              } else {
-                //DEFAULT COMPONENT`
-                ch = <FormItem_TEXT_EL {...{ ...s, ...vv }} />;
+        <Y
+          variant={["box", "light", "rounded", "shadow"] || p.variant}
+          gap={10}
+        >
+          {(_header || back) && (
+            <div>
+              {back && <BackButton />}
+              {_header && h}
+            </div>
+          )}
+          {children}
+          <div
+            css={css`
+              * + .form-item-LABEL {
+                margin-top: 1rem;
+                margin-bottom: 0.5rem;
               }
-              return <div key="index">{ch}</div>;
-            })}
+            `}
+            className="grid grid-cols-12 gap-2"
+          >
+            {steps[k.step] &&
+              steps[k.step].map((s, index) => {
+                let ch = <>TODO</>;
+                let size = "12";
+                let component = "LABEL";
+                if (typeof s !== "string" && s.widthPercent) {
+                  const percent = parseInt(s.widthPercent.toString());
+                  size = Math.round((percent / 100) * 12).toString();
+                }
+                if (typeof s !== "string") {
+                  component = s.component;
+                }
+
+                if (typeof s === "string") {
+                  ch = (
+                    <FormItem_LABEL_EL
+                      {...{
+                        ...{ component: "LABEL", value: async () => s },
+                        ...vv,
+                      }}
+                    />
+                  );
+                } else if (s.component === "LABEL") {
+                  ch = <FormItem_LABEL_EL {...{ ...s, ...vv }} />;
+                } else if (s.component === "NUMBER_SLIDER") {
+                  ch = <FormItem_NUMBER_SLIDER_EL {...{ ...s, ...vv }} />;
+                } else if (s.component === "MULTI_SELECT_ITEM") {
+                  ch = <FormItem_MULTI_SELECT_ITEM_EL {...{ ...s, ...vv }} />;
+                } else if (s.component === "YES_NO") {
+                  ch = <FormItem_YES_NO_EL {...{ ...s, ...vv }} />;
+                } else if (s.component === "AVATAR_SELCTOR") {
+                  ch = <FormItem_AVATAR_SELCTOR_EL {...{ ...s, ...vv }} />;
+                } else {
+                  //DEFAULT COMPONENT`
+                  ch = <FormItem_TEXT_EL {...{ ...s, ...vv }} />;
+                }
+                return (
+                  <div
+                    className={`form-item form-item-${component} col-span-${size}`}
+                    key={index}
+                  >
+                    {ch}
+                  </div>
+                );
+              })}
+          </div>
+          <Y>
+            {cancel && k.step === 0 && <CancelButton />}
+            {k.step > 0 && <BackButton />}
+            {k.step !== steps.length - 1 && <NextButton />}
+            {submit && k.step === steps.length - 1 && <SubmitButton />}
+          </Y>
         </Y>
-        {cancel && k.step === 0 && <CancelButton />}
-        {k.step > 0 && <BackButton />}
-        {k.step !== steps.length - 1 && <NextButton />}
-        {submit && k.step === steps.length - 1 && <SubmitButton />}
       </TFormContext.Provider>
     );
   };
