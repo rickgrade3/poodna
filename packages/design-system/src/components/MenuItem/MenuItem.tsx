@@ -46,14 +46,14 @@ export default (props: MenuItemProps) => {
       ]}
     >
       <Ink />
-      <div css={tw`flex items-center justify-start space-x-2`}>
+      <div css={tw`flex items-center justify-start space-x-4`}>
         {[
           props.avatar && <Avatar src={props.avatar} />,
           props.before && <div>{props.before}</div>,
           props.icon && (
             <div
               css={[
-                tw`text-blue-700`,
+                tw`text-purple-700`,
                 `
                 svg{
                     fill:currentColor;
@@ -67,13 +67,13 @@ export default (props: MenuItemProps) => {
           props.children && <div>{props.children}</div>,
         ].filter((v) => v)}
       </div>
-      <div css={tw`flex items-center justify-end space-x-2`}>
+      <div css={tw`flex items-center justify-end space-x-4`}>
         {[
           props.label && <div css={tw`opacity-30`}>{props.label}</div>,
           props.after && <div>{props.after}</div>,
           props.checked && (
             <div>
-              <FaCheck css={tw`fill-current text-blue-700`} />
+              <FaCheck css={tw`fill-current text-purple-700`} />
             </div>
           ),
           props.chevron && (

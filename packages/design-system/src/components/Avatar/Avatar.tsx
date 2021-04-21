@@ -41,7 +41,7 @@ export default (props: AvatarProps) => {
             props.active
               ? tw`
                 ring-2
-                ring-blue-600
+                ring-purple-600
                 ring-offset-4
             `
               : "",
@@ -85,7 +85,7 @@ export default (props: AvatarProps) => {
         )}
       </div>
       {props.label && (
-        <div css={[tw`text-center`, props.active ? tw`text-blue-500` : ""]}>
+        <div css={[tw`text-center`, props.active ? tw`text-purple-500` : ""]}>
           <Typography size="text_sm" variant="normal">
             {props.label}
           </Typography>

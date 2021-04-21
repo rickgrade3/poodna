@@ -74,14 +74,14 @@ export default ({ tone = "LIGHT", ...props }: InputProps) => {
           _v
             ? tone === "LIGHT"
               ? tw`
-                border-blue-500
+                border-purple-500
                 bg-white
                 
                 hover:bg-gray-50
                 focus:outline-none
                 focus:ring-4
-                focus:ring-blue-100    
-                focus:border-blue-700  
+                focus:ring-purple-100    
+                focus:border-purple-700  
             `
               : tw`
                   text-white
@@ -91,10 +91,10 @@ export default ({ tone = "LIGHT", ...props }: InputProps) => {
               
               focus:outline-none
               focus:ring-4
-              focus:ring-blue-900    
-              focus:border-blue-500      
-              active:border-blue-500
-              active:text-blue-600 
+              focus:ring-purple-900    
+              focus:border-purple-500      
+              active:border-purple-500
+              active:text-purple-600 
               `
             : tone === "LIGHT"
             ? tw`
@@ -104,12 +104,12 @@ export default ({ tone = "LIGHT", ...props }: InputProps) => {
               
               focus:outline-none
               focus:ring-4
-              focus:ring-blue-100    
-              focus:border-blue-700      
+              focus:ring-purple-100    
+              focus:border-purple-700      
 
-              active:border-blue-500
+              active:border-purple-500
               active:bg-white
-              active:text-blue-600  
+              active:text-purple-600  
             `
             : tw`
               text-white
@@ -119,10 +119,10 @@ export default ({ tone = "LIGHT", ...props }: InputProps) => {
               
               focus:outline-none
               focus:ring-4
-              focus:ring-blue-900    
-              focus:border-blue-500      
-              active:border-blue-500
-              active:text-blue-600 
+              focus:ring-purple-900    
+              focus:border-purple-500      
+              active:border-purple-500
+              active:text-purple-600 
             `,
 
           props.rounded === "full" ? tw`rounded-full` : "",

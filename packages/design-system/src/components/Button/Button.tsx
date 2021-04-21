@@ -67,7 +67,7 @@ const StyleButton = styled.button<ButtonProps>(
         variant === "primary"
           ? tw`
           border
-          bg-blue-600          
+          bg-purple-600          
           border-none
           text-white
         `
@@ -76,48 +76,48 @@ const StyleButton = styled.button<ButtonProps>(
           ? tw`
           outline-none
           ring-4
-          ring-blue-200       
-          bg-blue-800             
+          ring-purple-200       
+          bg-purple-800             
         `
           : variant === "primary"
           ? tw`
-          hover:bg-blue-800
-          active:bg-blue-500          
+          hover:bg-purple-800
+          active:bg-purple-500          
           focus:outline-none
           focus:ring-4
-          focus:ring-blue-200          
+          focus:ring-purple-200          
         `
           : "",
         //GHOST
         variant === "ghost"
           ? tw`
-        border-blue-600
+        border-purple-600
         border
-        text-blue-600
+        text-purple-600
         bg-transparent
       `
           : "",
         variant === "ghost" && (loading || focus)
           ? tw`
-          bg-blue-100
-          border-blue-900
-          text-blue-900
+          bg-purple-100
+          border-purple-900
+          text-purple-900
           ring-4
-          ring-blue-200          
+          ring-purple-200          
         `
           : variant === "ghost"
           ? tw`
-          hover:bg-blue-50
-          hover:border-blue-900
-          hover:text-blue-900
+          hover:bg-purple-50
+          hover:border-purple-900
+          hover:text-purple-900
           
           focus:outline-none
           focus:ring-4
-          focus:ring-blue-200          
+          focus:ring-purple-200          
 
-          active:border-blue-500
+          active:border-purple-500
           active:bg-white
-          active:text-blue-600       
+          active:text-purple-600       
         `
           : "",
         //GHOST_DIM
@@ -133,25 +133,25 @@ const StyleButton = styled.button<ButtonProps>(
           ? tw`
           border
           border-transparent
-          bg-blue-50
-          border-blue-400
-          text-blue-900          
+          bg-purple-50
+          border-purple-400
+          text-purple-900          
           ring-4
-          ring-blue-100   
+          ring-purple-100   
         `
           : variant === "ghost_dim"
           ? tw`
-          hover:bg-blue-50
-          hover:border-blue-400
-          hover:text-blue-900
+          hover:bg-purple-50
+          hover:border-purple-400
+          hover:text-purple-900
           
           focus:outline-none
           focus:ring-4
-          focus:ring-blue-100          
+          focus:ring-purple-100          
 
-          active:border-blue-500
+          active:border-purple-500
           active:bg-white
-          active:text-blue-600  
+          active:text-purple-600  
         `
           : "",
         //DIM
@@ -159,8 +159,8 @@ const StyleButton = styled.button<ButtonProps>(
           ? tw`
         border
           border-transparent
-        bg-blue-50
-        text-blue-600
+        bg-purple-50
+        text-purple-600
         
       `
           : "",
@@ -168,22 +168,22 @@ const StyleButton = styled.button<ButtonProps>(
           ? tw`
             outline-none
             ring-4
-            border-blue-600
-            ring-blue-50          
-            bg-blue-100
-            text-blue-600
+            border-purple-600
+            ring-purple-50          
+            bg-purple-100
+            text-purple-600
         `
           : variant === "dim"
           ? tw`
-            hover:bg-blue-200
-            hover:text-blue-900
+            hover:bg-purple-200
+            hover:text-purple-900
             focus:outline-none
             focus:ring-4
-            focus:border-blue-500
-            focus:ring-blue-50          
-            active:bg-blue-100
-            active:text-blue-600
-            active:border-blue-500
+            focus:border-purple-500
+            focus:ring-purple-50          
+            active:bg-purple-100
+            active:text-purple-600
+            active:border-purple-500
         `
           : "",
         //TEXT
@@ -192,7 +192,7 @@ const StyleButton = styled.button<ButtonProps>(
         border
           border-transparent
         bg-transparent
-        text-blue-600
+        text-purple-600
         border-transparent
 
         
@@ -200,16 +200,16 @@ const StyleButton = styled.button<ButtonProps>(
           : "",
         variant === "text" && (loading || focus)
           ? tw`
-            bg-blue-200
-            text-blue-600
+            bg-purple-200
+            text-purple-600
         `
           : variant === "text"
           ? tw`
-            hover:bg-blue-100
-            hover:text-blue-900
+            hover:bg-purple-100
+            hover:text-purple-900
             focus:outline-none
-            active:bg-blue-200
-            active:text-blue-600
+            active:bg-purple-200
+            active:text-purple-600
         `
           : "",
         //TEXT_GREY
@@ -269,7 +269,7 @@ const StyleButton = styled.button<ButtonProps>(
         variant === "primary"
           ? tw`
           border
-          bg-blue-600          
+          bg-purple-600          
           border-none
           text-white
         `
@@ -278,18 +278,18 @@ const StyleButton = styled.button<ButtonProps>(
           ? tw`
           outline-none
           ring-4
-          ring-blue-900 
+          ring-purple-900 
           ring-opacity-50      
-          bg-blue-800             
+          bg-purple-800             
         `
           : variant === "primary"
           ? tw`
-          hover:bg-blue-400
-          active:bg-blue-500          
+          hover:bg-purple-400
+          active:bg-purple-500          
           focus:outline-none
           focus:ring-4
           focus:ring-opacity-50
-          focus:ring-blue-900          
+          focus:ring-purple-900          
         `
           : "",
         //GHOST
@@ -338,24 +338,24 @@ const StyleButton = styled.button<ButtonProps>(
           border
           border-transparent
           bg-white
-          border-blue-400
-          text-blue-900          
+          border-purple-400
+          text-purple-900          
           ring-4
           ring-gray-600   
         `
           : variant === "ghost_dim"
           ? tw`
           hover:bg-white
-          hover:border-blue-400
-          hover:text-blue-900
+          hover:border-purple-400
+          hover:text-purple-900
           
           focus:outline-none
           focus:ring-4
           focus:ring-gray-600          
 
-          active:border-blue-500
+          active:border-purple-500
           active:bg-white
-          active:text-blue-600  
+          active:text-purple-600  
         `
           : "",
         //DIM
@@ -372,22 +372,22 @@ const StyleButton = styled.button<ButtonProps>(
           ? tw`
             outline-none
             ring-4
-            border-blue-600
-            ring-blue-900          
+            border-purple-600
+            ring-purple-900          
             bg-white
-            text-blue-600
+            text-purple-600
         `
           : variant === "dim"
           ? tw`
             hover:bg-white
-            hover:text-blue-900
+            hover:text-purple-900
             focus:outline-none
             focus:ring-4
-            focus:border-blue-500
-            focus:ring-blue-900          
+            focus:border-purple-500
+            focus:ring-purple-900          
             active:bg-white
-            active:text-blue-600
-            active:border-blue-500
+            active:text-purple-600
+            active:border-purple-500
         `
           : "",
         //TEXT
