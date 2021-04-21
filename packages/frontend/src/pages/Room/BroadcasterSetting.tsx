@@ -18,7 +18,6 @@ export default (p: { roomId: string; onSubmit: () => any }) => {
           ctaFloating: true,
           submit: {
             onClick: async (x) => {
-              console.log("xxx", x);
               for (const u of x.braodcasters) {
                 await api.ChatRoom.add_broadcaster.execute({
                   id: p.roomId,

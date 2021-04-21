@@ -119,6 +119,27 @@ export default {
       };
     },
   }),
+  remove_broadcaster: APIGen<
+    { id: string; userId: string },
+    { list: User[] },
+    User
+  >({
+    exec: (p, gun) => {
+      return gun
+        .get("rooms")
+        .get(p.id)
+        .get("broadcasters")
+        .get(p.userId)
+        .put(null)
+        .back();
+    },
+    value: (res, gun, prev) => {
+      console.log("del", res);
+      return {
+        list: _.uniqBy([...(prev?.list || []), res], "id"),
+      };
+    },
+  }),
   add_outsider: APIGen<{ id: string; userId: string }, { list: User[] }, User>({
     exec: (p, gun) => {
       return gun

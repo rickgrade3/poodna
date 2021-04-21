@@ -34,7 +34,11 @@ const _useRoom = (_roomId: string) => {
   const total_mainloop = mainloop?.list?.length || 0;
   const total_outsider = outsider?.list?.length || 0;
   return {
-    total_users: total_outsider + total_mainloop + total_broadcasters,
+    total_users: _.uniq(
+      [broadcasters?.list || [], mainloop?.list || [], outsider?.list || []]
+        .flat()
+        .map((d) => d.id)
+    ).length,
     room,
     setRoom,
     roomId,

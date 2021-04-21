@@ -67,7 +67,7 @@ export class BasicAppStore<User> {
   error_noti(msg: string) {
     this.noti({
       message: msg,
-      key: "login",
+      key: Math.random().toString(),
       variant: "error",
       autoHideDuration: 3000,
       anchorOrigin: {
@@ -79,8 +79,20 @@ export class BasicAppStore<User> {
   success_noti(msg: string) {
     this.noti({
       message: msg,
-      key: "login",
+      key: Math.random().toString(),
       variant: "success",
+      autoHideDuration: 3000,
+      anchorOrigin: {
+        vertical: "top",
+        horizontal: "center",
+      },
+    });
+  }
+  info_noti(msg: string) {
+    this.noti({
+      message: msg,
+      key: Math.random().toString(),
+      variant: "info",
       autoHideDuration: 3000,
       anchorOrigin: {
         vertical: "top",

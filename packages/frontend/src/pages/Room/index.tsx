@@ -65,7 +65,25 @@ const Users = () => {
             <Y className="w-1/4" autoW={true}>
               <Button
                 onClick={() => {
-                  if (!r.mainloop?.list?.[i])
+                  if (r.mainloop?.list?.[i] && isBroadCaster) {
+                    api.ChatRoom.remove_broadcaster
+                      .execute({
+                        id: r.roomId,
+                        userId: r.mainloop?.list?.[i].id,
+                      })
+                      .then(() => {
+                        appStore.info_noti("Unset Broadcaster");
+                      });
+                  } else if (r.mainloop?.list?.[i] && !isBroadCaster) {
+                    api.ChatRoom.add_broadcaster
+                      .execute({
+                        id: r.roomId,
+                        userId: r.mainloop?.list?.[i].id,
+                      })
+                      .then(() => {
+                        appStore.success_noti("Promote to Broadcaster");
+                      });
+                  } else if (!r.mainloop?.list?.[i])
                     appStore.openDialog({
                       variant: "DRAWER",
                       title: "Main Loop Setting",
@@ -81,7 +99,11 @@ const Users = () => {
                 variant="text_gray"
               >
                 <Avatar
-                  active={!!isBroadCaster}
+                  left={
+                    !!isBroadCaster ? (
+                      <Icons.FaBroadcastTower style={{ color: "white" }} />
+                    ) : undefined
+                  }
                   size="lg"
                   background={"rgba(0,0,0,0.1)"}
                   src={

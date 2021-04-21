@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactElement } from "react";
 import tw, { css, styled, theme } from "twin.macro";
 import Typography from "../Typography/Typography";
 
@@ -19,7 +19,7 @@ type AvatarStatus = keyof typeof AvatarStatusEnum;
 export interface AvatarProps {
   src: string;
   text?: string;
-  left?: string;
+  left?: string | ReactElement;
   background?: string;
   size?: AvatarSize;
   status?: AvatarStatus;
@@ -82,6 +82,21 @@ export default (props: AvatarProps) => {
               props.status === "offline" ? tw`bg-red-500` : "",
             ]}
           ></div>
+        )}
+        {props.left && (
+          <div
+            css={[
+              tw`
+                w-7 h-7 rounded-full ring-2 ring ring-white absolute  transform -translate-x-1/2  -translate-y-1/2 bg-purple-600 flex items-center justify-center
+                `,
+              `
+                    top:87%;
+                    left:11%;
+                `,
+            ]}
+          >
+            {props.left}
+          </div>
         )}
       </div>
       {props.label && (
