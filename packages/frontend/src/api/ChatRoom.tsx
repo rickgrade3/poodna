@@ -43,7 +43,7 @@ export default {
     },
     value: (res, gun, prev) => {
       return {
-        list: [...(prev?.list || []), res],
+        list: _.uniqBy([...(prev?.list || []), res], "id"),
       };
     },
   }),
@@ -58,7 +58,7 @@ export default {
         };
       }
       return {
-        list: [...(prev?.list || []), res],
+        list: _.uniqBy([...(prev?.list || []), res], "id"),
       };
     },
   }),
@@ -67,9 +67,9 @@ export default {
       return gun.get("rooms").get(p.id).get("broadcasters").map();
     },
     value: (res, gun, prev) => {
-      console.log(res);
+      console.log("resres", res);
       return {
-        list: [...(prev?.list || []), res],
+        list: _.uniqBy([...(prev?.list || []), res], "id"),
       };
     },
   }),
@@ -102,7 +102,7 @@ export default {
     value: (res, gun, prev) => {
       console.log("res", res);
       return {
-        list: [...(prev?.list || []), res],
+        list: _.uniqBy([...(prev?.list || []), res], "id"),
       };
     },
   }),
@@ -126,7 +126,7 @@ export default {
     },
     value: (res, gun, prev) => {
       return {
-        list: [...(prev?.list || []), res],
+        list: _.uniqBy([...(prev?.list || []), res], "id"),
       };
     },
   }),
@@ -136,7 +136,7 @@ export default {
     },
     value: (res, gun, prev) => {
       return {
-        list: [...(prev?.list || []), res],
+        list: _.uniqBy([...(prev?.list || []), res], "id"),
       };
     },
   }),

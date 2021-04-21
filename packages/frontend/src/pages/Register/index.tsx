@@ -36,7 +36,12 @@ export default () => {
               const r = await apiCall(p);
               console.log(r);
               localStorage.setItem("userId", r.item.id);
-              appStore.push("/create_room");
+              let from = appStore.queryStr()["from"];
+              if (from) {
+                appStore.push(decodeURIComponent(from));
+              } else {
+                appStore.push("/create_room");
+              }
 
               return true;
             },

@@ -269,6 +269,7 @@ function Form<F>() {
     useEffect(() => {
       setRd(false);
       Promise.all([p.choices(p.form), p.value(p.form)]).then(([v1, v2]) => {
+        console.log("v1", v1);
         setChoices(v1);
         setV(v2);
         setRd(true);
@@ -424,7 +425,7 @@ function Form<F>() {
     return (
       <TFormContext.Provider value={vv}>
         <Y
-          variant={["box", "light", "rounded", "shadow"] || p.variant}
+          variant={p.variant || ["box", "light", "rounded", "shadow"]}
           gap={10}
         >
           {(_header || back) && (

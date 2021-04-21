@@ -1,13 +1,16 @@
-import { Form, Typography } from "@poodna/design-system/src";
+import { Avatar, Form, Typography } from "@poodna/design-system/src";
+import React from "react";
+import api from "src/api";
 interface Fields {
   braodcasters: string[];
 }
 const { Form: F } = Form<Fields>();
-export default () => {
+export default (p: { roomId: string }) => {
   return (
     <>
       <F
         {...{
+          variant: ["box"],
           initialValue: {
             braodcasters: [],
           },
@@ -23,7 +26,22 @@ export default () => {
               {
                 component: "MULTI_SELECT_ITEM",
                 field: "braodcasters",
-                choices: async (d) => [],
+                choices: async () => {
+                  return await new Promise((resolve) => {
+                    api.ChatRoom.list_mainloop
+                      .execute({ id: p.roomId })
+                      .then((d) => {
+                        console.log("d", d);
+                        resolve(
+                          d.list.map((d) => ({
+                            label: d.name,
+                            value: d.id,
+                            decoration: <Avatar src={d.avatar} />,
+                          }))
+                        );
+                      });
+                  });
+                },
                 value: async (d, choices) =>
                   d.braodcasters.map((d) => ({ value: d })),
               },

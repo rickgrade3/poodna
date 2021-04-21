@@ -1,3 +1,4 @@
+import { css } from "@emotion/react";
 import {
   Avatar,
   Button,
@@ -62,8 +63,11 @@ const Users = () => {
                 <Avatar
                   size="lg"
                   background={"rgba(0,0,0,0.1)"}
-                  src={r.mainloop?.list?.[i]?.avatar || ""}
-                  label={r.mainloop?.list?.[i]?.name || `Slot ${i + 1}`}
+                  src={
+                    r.mainloop?.list?.[i]?.avatar ||
+                    "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"
+                  }
+                  label={r.mainloop?.list?.[i]?.name || `Set user ${i + 1}`}
                 />
               </Button>
             </Y>
@@ -74,7 +78,7 @@ const Users = () => {
 };
 const Listeners = () => {
   const r = useRoom();
-  console.log(r.outsider);
+
   return (
     <X wrap gap={0} align="center" py={4} justify="start">
       {r.outsider?.list.map((u) => {
@@ -115,7 +119,7 @@ const Inner = () => {
               variant: "DRAWER",
               title: "Broadcaster Setting",
               content: ({ back }) => {
-                return <BroadcasterSetting />;
+                return <BroadcasterSetting roomId={r.roomId} />;
               },
             });
           }}
@@ -135,7 +139,18 @@ const Inner = () => {
         <ListenerHeader />
         <Listeners />
       </Y>
-      <Button icon={<Icons.FaLink />}></Button>
+      <Button
+        css={css`
+          position: fixed;
+          bottom: 2rem;
+          right: 2rem;
+          width: auto;
+        `}
+        size="xl"
+        variant="primary"
+        full={false}
+        icon={<Icons.FaLink />}
+      ></Button>
     </Y>
   );
 };

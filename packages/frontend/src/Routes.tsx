@@ -41,7 +41,9 @@ const Auth = (p: { children: ReactElement }) => {
           return;
         },
         toFallback: () => {
-          router.push("/register");
+          router.push(
+            `/register?from=${encodeURIComponent(window.location.pathname)}`
+          );
         },
       }}
     >
