@@ -13,6 +13,7 @@ import api from "src/api";
 import { Icons } from "src/components/Icons";
 import { appStore } from "src/stores/appStore";
 import BroadcasterSetting from "./BroadcasterSetting";
+import MainloopSetting from "./MainloopSetting";
 import { RoomProviderWrapper, useRoom } from "./RoomProvider";
 
 const Stat = () => {
@@ -56,6 +57,18 @@ const Users = () => {
           return (
             <Y className="w-1/4" autoW={true}>
               <Button
+                onClick={() => {
+                  if (!r.mainloop?.list?.[i])
+                    appStore.openDialog({
+                      variant: "DRAWER",
+                      title: "Main Loop Setting",
+                      content: ({ back }) => {
+                        return (
+                          <MainloopSetting roomId={r.roomId} onSubmit={back} />
+                        );
+                      },
+                    });
+                }}
                 size="auto"
                 style={{ padding: "1rem" }}
                 variant="text_gray"
@@ -119,7 +132,7 @@ const Inner = () => {
               variant: "DRAWER",
               title: "Broadcaster Setting",
               content: ({ back }) => {
-                return <BroadcasterSetting roomId={r.roomId} />;
+                return <BroadcasterSetting roomId={r.roomId} onSubmit={back} />;
               },
             });
           }}

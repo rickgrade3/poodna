@@ -2,7 +2,7 @@ import { Avatar, Form, Typography } from "@poodna/design-system/src";
 import React from "react";
 import api from "src/api";
 interface Fields {
-  braodcasters: string[];
+  mainloops: string[];
 }
 const { Form: F } = Form<Fields>();
 export default (p: { roomId: string; onSubmit: () => any }) => {
@@ -12,15 +12,18 @@ export default (p: { roomId: string; onSubmit: () => any }) => {
         {...{
           variant: ["box"],
           initialValue: {
-            braodcasters: [],
+            mainloops: [],
           },
-          header: "Pick friends that will forward sounds to the others",
+          header: "Add User to Main Loop",
           ctaFloating: true,
           submit: {
             onClick: async (x) => {
-              console.log("xxx", x);
-              for (const u of x.braodcasters) {
-                await api.ChatRoom.add_broadcaster.execute({
+              for (const u of x.mainloops) {
+                await api.ChatRoom.add_mainloop.execute({
+                  id: p.roomId,
+                  userId: u,
+                });
+                await api.ChatRoom.remove_listener.execute({
                   id: p.roomId,
                   userId: u,
                 });
@@ -33,9 +36,9 @@ export default (p: { roomId: string; onSubmit: () => any }) => {
             [
               {
                 component: "MULTI_SELECT_ITEM_HOOK",
-                field: "braodcasters",
+                field: "mainloops",
                 choices: () => {
-                  const { data } = api.ChatRoom.list_mainloop.hook({
+                  const { data } = api.ChatRoom.list_outsider.hook({
                     id: p.roomId,
                   });
                   return {
@@ -47,7 +50,7 @@ export default (p: { roomId: string; onSubmit: () => any }) => {
                   };
                 },
                 value: async (d, choices) =>
-                  d.braodcasters.map((d) => ({ value: d })),
+                  d.mainloops.map((d) => ({ value: d })),
               },
             ],
           ],

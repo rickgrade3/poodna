@@ -54,6 +54,12 @@ interface FormItem_MULTI_SELECT_ITEM<F> extends Base<F> {
   choices: (d: F) => Promise<ItemEl[]>;
   value: (d: F, choices?: ItemEl[]) => Promise<ItemEl[]>;
 }
+
+interface FormItem_MULTI_SELECT_ITEM_HOOK<F> extends Base<F> {
+  component: "MULTI_SELECT_ITEM_HOOK";
+  choices: (d: F) => { data: ItemEl[] };
+  value: (d: F, choices?: ItemEl[]) => Promise<ItemEl[]>;
+}
 interface FormItem_AVATAR_SELCTOR<F> extends Base<F> {
   component: "AVATAR_SELCTOR";
   choices?: (d: F) => Promise<ItemEl[]> | false;
@@ -71,6 +77,7 @@ type StepItem<F> =
   | FormItem_AVATAR_SELCTOR<F>
   | FormItem_NUMBER_SLIDER<F>
   | FormItem_MULTI_SELECT_ITEM<F>
+  | FormItem_MULTI_SELECT_ITEM_HOOK<F>
   | FormItem_YES_NO<F>
   | string;
 
@@ -306,6 +313,52 @@ function Form<F>() {
       </Y>
     );
   };
+
+  const FormItem_MULTI_SELECT_ITEM_HOOK_EL = (
+    p: FormItem_MULTI_SELECT_ITEM_HOOK<F> & T_FORM_ContextValue
+  ) => {
+    const [rd, setRd] = useState<boolean>(false);
+    const { data: choices } = p.choices(p.form);
+    const [_v, setV] = useState<ReturnType<typeof p.choices>["data"]>([]);
+    useEffect(() => {
+      setRd(false);
+      Promise.all([p.value(p.form)]).then(([v2]) => {
+        setV(v2);
+        setRd(true);
+      });
+    }, []);
+    useEffect(() => {
+      if (rd) {
+        p.setForm({
+          ...p.form,
+          [p.field]: _v.map((v) => v.value),
+        });
+      }
+    }, [_v]);
+    return (
+      <Y>
+        {choices.map((c) => {
+          const checked = !!_v.find((_c) => _c.value === c.value);
+          return (
+            <MenuItem
+              checked={checked}
+              before={c.decoration}
+              onClick={() => {
+                if (!checked) {
+                  setV([..._v, c]);
+                } else {
+                  setV(_v.filter((x) => x.value !== c.value));
+                }
+              }}
+            >
+              {c.label}
+            </MenuItem>
+          );
+        })}
+      </Y>
+    );
+  };
+
   const FormItem_YES_NO_EL = (p: FormItem_YES_NO<F> & T_FORM_ContextValue) => {
     const [rd, setRd] = useState<boolean>(false);
     const [_v, setV] = useState<boolean>(false);
@@ -472,6 +525,10 @@ function Form<F>() {
                   ch = <FormItem_NUMBER_SLIDER_EL {...{ ...s, ...vv }} />;
                 } else if (s.component === "MULTI_SELECT_ITEM") {
                   ch = <FormItem_MULTI_SELECT_ITEM_EL {...{ ...s, ...vv }} />;
+                } else if (s.component === "MULTI_SELECT_ITEM_HOOK") {
+                  ch = (
+                    <FormItem_MULTI_SELECT_ITEM_HOOK_EL {...{ ...s, ...vv }} />
+                  );
                 } else if (s.component === "YES_NO") {
                   ch = <FormItem_YES_NO_EL {...{ ...s, ...vv }} />;
                 } else if (s.component === "AVATAR_SELCTOR") {
