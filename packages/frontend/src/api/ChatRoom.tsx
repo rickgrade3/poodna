@@ -63,24 +63,6 @@ export default {
     },
   }),
 
-  add_broadcaster: APIGen<
-    { id: string; userId: string },
-    { list: User[] },
-    User
-  >({
-    exec: (p, gun) => {
-      return gun
-        .get("rooms")
-        .get(p.id)
-        .get("broadcasters")
-        .put(gun.get("users").get(p.userId) as any);
-    },
-    value: (res, gun, prev) => {
-      return {
-        list: [...(prev?.list || []), res],
-      };
-    },
-  }),
   add_mainloop: APIGen<{ id: string; userId: string }, { list: User[] }, User>({
     exec: (p, gun) => {
       return gun
@@ -115,6 +97,25 @@ export default {
       console.log("del", res);
       return {
         list: _.uniqBy([...(prev?.list || []), res], "id"),
+      };
+    },
+  }),
+  add_broadcaster: APIGen<
+    { id: string; userId: string },
+    { list: User[] },
+    User
+  >({
+    exec: (p, gun) => {
+      return gun
+        .get("rooms")
+        .get(p.id)
+        .get("broadcasters")
+        .get(p.userId)
+        .put(gun.get("users").get(p.userId) as any);
+    },
+    value: (res, gun, prev) => {
+      return {
+        list: [...(prev?.list || []), res],
       };
     },
   }),

@@ -48,12 +48,19 @@ const Title = () => {
 };
 const Users = () => {
   const r = useRoom();
+
   return (
     <X wrap gap={0} align="center" py={4} justify="start">
       {Array(r.room.item.maximum)
         .fill(0)
         .map((d, i) => {
           console.log("x");
+          const isBroadCaster = (r.broadcasters?.list || []).find(
+            (_d) =>
+              r.mainloop?.list?.[i] &&
+              _d.id &&
+              _d.id === r.mainloop?.list?.[i].id
+          );
           return (
             <Y className="w-1/4" autoW={true}>
               <Button
@@ -74,6 +81,7 @@ const Users = () => {
                 variant="text_gray"
               >
                 <Avatar
+                  active={!!isBroadCaster}
                   size="lg"
                   background={"rgba(0,0,0,0.1)"}
                   src={
