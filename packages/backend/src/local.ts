@@ -50,3 +50,11 @@ const gun = Gun({
 });
 
 gun.get("users").put({});
+
+let [u1, u2] = server.listeners("upgrade").slice(0);
+server.removeAllListeners("upgrade");
+server.on("upgrade", (req, socket, head) => {
+  if (req.url.indexOf("/socket.io") >= 0) u1(req, socket, head);
+  else if (req.url.indexOf("/gun") >= 0) u2(req, socket, head);
+  else socket.destroy();
+});
