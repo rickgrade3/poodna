@@ -160,7 +160,7 @@ const Inner = () => {
           onClick={() => {
             appStore.openDialog({
               variant: "DRAWER",
-              title: "Broadcaster Setting",
+              title: "Set broadcaster",
               content: ({ back }) => {
                 return <BroadcasterSetting roomId={r.roomId} onSubmit={back} />;
               },
@@ -169,7 +169,7 @@ const Inner = () => {
           icon={<Icons.FaBroadcastTower />}
           chevron
         >
-          Broadcaster Setting
+          Set broadcaster
         </MenuItem>
         <MenuItem icon={<Icons.FaShare />} chevron>
           Share
