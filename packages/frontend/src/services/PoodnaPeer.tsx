@@ -28,41 +28,24 @@ export class PoodnaPeer extends RPeer {
 export class MainLoopPeer extends PoodnaPeer {
   async onOffer(data: SocketEventData) {
     //Connect back if it is mainLoopIds
-    if (
-      this.mainloops()
-        .map((u) => u.id)
-        .indexOf(data.fromUserId) >= 0
-    ) {
-      console.log("to", data.fromUserId);
-      this.callToUser(data.fromUserId);
-    } else if (
-      this.broadcasters()
-        .map((u) => u.id)
-        .indexOf(data.fromUserId) >= 0
-    ) {
-      this.callToUser(data.fromUserId);
-    }
+    this.callToUser(data.fromUserId);
   }
-  async shouldAcceptOffer(data: SocketEventData) {
-    //Accept incoming if broadcaster or mainloop
-    return (
-      this.mainloops()
-        .map((u) => u.id)
-        .indexOf(data.fromUserId) >= 0 ||
-      this.broadcasters()
-        .map((u) => u.id)
-        .indexOf(data.fromUserId) >= 0
-    );
-  }
+  // async shouldAcceptOffer(data: SocketEventData) {
+  //   //Accept incoming if broadcaster or mainloop
+  //   return (
+  //     this.mainloops()
+  //       .map((u) => u.id)
+  //       .indexOf(data.fromUserId) >= 0 ||
+  //     this.broadcasters()
+  //       .map((u) => u.id)
+  //       .indexOf(data.fromUserId) >= 0
+  //   );
+  // }
   async onConnect(hop: Hop) {
     //Trigger on data change
   }
   onNewUserInRoom(user: PoodnaPeerUser) {
-    if (user.role === "BROADCASTER") {
-      this.callToUser(user.id, true);
-    } else if (user.role === "MAIN_LOOP") {
-      this.callToUser(user.id, true);
-    }
+    this.callToUser(user.id, true);
   }
 }
 
@@ -90,14 +73,14 @@ export class BroadCasterPeer extends PoodnaPeer {
       }
     }
   }
-  async shouldAcceptOffer(data: SocketEventData) {
-    //Connect accept if it is mainLoopIds
-    return (
-      this.mainloops()
-        .map((u) => u.id)
-        .indexOf(data.fromUserId) >= 0
-    );
-  }
+  // async shouldAcceptOffer(data: SocketEventData) {
+  //   //Connect accept if it is mainLoopIds
+  //   return (
+  //     this.mainloops()
+  //       .map((u) => u.id)
+  //       .indexOf(data.fromUserId) >= 0
+  //   );
+  // }
   selectStream(fromId: string, toId: string) {
     //Use combine stream if it is connection to outsider
     if (
@@ -147,14 +130,14 @@ export class ListenerPeer extends PoodnaPeer {
   async onOffer(data: SocketEventData) {
     //Do not connect back
   }
-  async shouldAcceptOffer(data: SocketEventData) {
-    //Do not accept any offer
-    return (
-      this.broadcasters()
-        .map((b) => b.id)
-        .indexOf(data.fromUserId) >= 0
-    );
-  }
+  // async shouldAcceptOffer(data: SocketEventData) {
+  //   //Do not accept any offer
+  //   return (
+  //     this.broadcasters()
+  //       .map((b) => b.id)
+  //       .indexOf(data.fromUserId) >= 0
+  //   );
+  // }
   async onConnect(hop: Hop) {
     //Trigger on data change
   }

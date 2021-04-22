@@ -75,12 +75,12 @@ export default () => {
   const broadcasters: PoodnaPeerUser[] = (r.broadcasters?.list || []).map(
     (v) => ({
       id: v.id,
-      role: "BROADCASTER",
+      role: "MAIN_LOOP",
     })
   );
   const listeners: PoodnaPeerUser[] = (r.outsider?.list || []).map((v) => ({
     id: v.id,
-    role: "LISTENER",
+    role: "MAIN_LOOP",
   }));
   const users: PoodnaPeerUser[] = _.uniqBy(
     [].concat(broadcasters).concat(mainLoops).concat(listeners),

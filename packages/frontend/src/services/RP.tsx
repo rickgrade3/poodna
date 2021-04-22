@@ -35,6 +35,7 @@ export class Hop {
     if (!this.isOutgoing) {
       const audioEl = document.createElement("audio");
       audioEl.setAttribute("autoplay", "true");
+      audioEl.setAttribute("controls", "true");
       document.getElementsByTagName("body")[0].appendChild(audioEl);
       this.pc.addEventListener("icecandidate", (e) =>
         onIceCandidate(this.pc, e)
