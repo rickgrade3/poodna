@@ -10,7 +10,7 @@ class GunStore {
   }
   gun: IGunChainReference<AppDB, any, "pre_root">;
   load_gun() {
-    if (!this.gun) this.gun = Gun<AppDB>(["http://localhost:8765/gun"]);
+    if (!this.gun) this.gun = Gun<AppDB>(["http://localhost:9002/gun"]);
   }
 }
 export const gunStore = new GunStore();

@@ -1,7 +1,8 @@
 import express from "express";
 import { AvailableEventsStr, SEND_DATA } from "@poodna/datatype";
 var app = express();
-
+const Gun = require("gun");
+app.use(Gun.serve).use(express.static(__dirname));
 app.get("/", (req, res, next) => res.send("Hello world!"));
 
 const server = app.listen(9002);
@@ -42,12 +43,9 @@ io.on("connection", (socket: any) => {
   );
 });
 
-const Gun = require("gun");
 const gun = Gun({
   file: "db",
-  web: require("http")
-    .createServer(Gun.serve(__dirname))
-    .listen(8765),
+  web: server,
   localStorage: true,
 });
 
