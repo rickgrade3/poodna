@@ -69,7 +69,7 @@ export class Hop {
     }
     const _this = this;
     async function onIceCandidate(pc: RTCPeerConnection, event: any) {
-      console.log("On ice candidate");
+      console.log("On ice candidate this must not null >>>", event.candidate);
       if (_this.isOutgoing) {
         c.rp.socket.emit(SEND_DATA, {
           toUserId: c.toId,
