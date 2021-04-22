@@ -22,12 +22,7 @@ export class Hop {
     this.attr = c;
     const configuration = {
       iceServers: [
-        {
-          urls: [
-            "stun:stun.l.google.com:19302",
-            "stun:global.stun.twilio.com:3478",
-          ],
-        },
+        { url: "stun:stun.l.google.com:19302" },
         {
           urls: "turn:0.peerjs.com:3478",
           username: "peerjs",
