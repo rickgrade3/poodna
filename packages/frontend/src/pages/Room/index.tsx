@@ -21,7 +21,7 @@ const Stat = () => {
   return (
     <X justify="start">
       <Typography variant="normal">
-        Main Loop : {r.total_mainloop}/{r.room.item.maximum}
+        Speaker : {r.total_mainloop}/{r.room.item.maximum}
       </Typography>
       <Typography variant="normal">Users : {r.total_users}</Typography>
       <Typography variant="normal">

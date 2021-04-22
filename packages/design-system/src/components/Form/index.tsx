@@ -1,7 +1,8 @@
 import { head } from "lodash";
+import { resolve } from "node:path";
 import React, { ReactElement, useContext, useEffect, useState } from "react";
 import tw, { css, styled, theme } from "twin.macro";
-import { Avatar, Button, MenuItem } from "../..";
+import { Avatar, Button, Loading, MenuItem } from "../..";
 import Input from "../Input/Input";
 import { LayourBaseProps, X, Y } from "../Layout/Layout";
 import Typography, { TypographyProps } from "../Typography/Typography";
@@ -62,7 +63,7 @@ interface FormItem_MULTI_SELECT_ITEM_HOOK<F> extends Base<F> {
 }
 interface FormItem_AVATAR_SELCTOR<F> extends Base<F> {
   component: "AVATAR_SELCTOR";
-  choices?: (d: F) => Promise<ItemEl[]> | false;
+  choices?: (d: F) => Promise<ItemEl[]>;
   value: (d: F, choices?: ItemEl[]) => Promise<ItemEl>;
 }
 
@@ -401,19 +402,31 @@ function Form<F>() {
   const FormItem_AVATAR_SELCTOR_EL = (
     p: FormItem_AVATAR_SELCTOR<F> & T_FORM_ContextValue
   ) => {
-    const AVATARS = [
-      "https://images.unsplash.com/photo-1618767628748-283b5a308f1d?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwyfHx8ZW58MHx8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
-      "https://images.unsplash.com/photo-1618827718822-98fae761b7b4?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwzfHx8ZW58MHx8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
-    ];
     const [rd, setRd] = useState<boolean>(false);
-
+    const [srcs, setSrcs] = useState<string[]>([]);
     const [_v, setV] = useState<
       ThenArg<ReturnType<typeof p.value>> | undefined
     >();
     useEffect(() => {
       setRd(false);
-      Promise.all([p.value(p.form)]).then(([v1, v2]) => {
-        setV(v1);
+      const f = p.choices
+        ? p.choices(p.form)
+        : new Promise<ItemEl[]>((vr) => {
+            vr(
+              [
+                "https://images.unsplash.com/photo-1618767628748-283b5a308f1d?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwyfHx8ZW58MHx8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+                "https://images.unsplash.com/photo-1618827718822-98fae761b7b4?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwzfHx8ZW58MHx8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+                "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?ixid=MnwxMjA3fDF8MHxlZGl0b3JpYWwtZmVlZHwxfHx8ZW58MHx8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+                "https://images.unsplash.com/photo-1595182199834-d608f63fb251?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwyfHx8ZW58MHx8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+                "https://images.unsplash.com/photo-1618020661610-bd9432299fe1?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwzfHx8ZW58MHx8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+              ].map((s) => {
+                return { value: s };
+              })
+            );
+          });
+      Promise.all([f, p.value(p.form)]).then(([v1, v2]) => {
+        setSrcs(v1.map((v) => v.value?.toString()));
+        setV(v2);
         setRd(true);
       });
     }, []);
@@ -426,8 +439,9 @@ function Form<F>() {
       }
     }, [_v]);
     return (
-      <X>
-        {AVATARS.map((c) => {
+      <X justify={"start"} p={3} style={{ overflow: "auto" }}>
+        {!rd && <Loading />}
+        {srcs.map((c) => {
           const actived = c === (_v && _v.value);
           return (
             <div
