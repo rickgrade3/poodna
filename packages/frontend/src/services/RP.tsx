@@ -67,6 +67,7 @@ export class Hop {
         },
       ],
       sdpSemantics: "unified-plan",
+      iceTransportPolicy: "relay",
     } as any;
     this.pc = new RTCPeerConnection(configuration);
     if (!this.isOutgoing) {
