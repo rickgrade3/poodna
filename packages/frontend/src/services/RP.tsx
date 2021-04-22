@@ -280,8 +280,10 @@ export class RPeer extends EventTarget {
           if (data.payload.clearPC) {
             this.closeHop(data.fromUserId, this.userId);
           }
+          console.log("<<<INCOMING>>>", data);
           await this.onOffer(data);
           if (await this.shouldAcceptOffer(data)) {
+            console.log("<<<FIRE INCOMING>>>", data);
             const hop = await this.fetchHop(data.fromUserId, this.userId);
             await hop.onSocketOffer(data.payload.offer);
           }
@@ -322,6 +324,7 @@ export class RPeer extends EventTarget {
   }
 
   async callToUser(toUserId: string, clearPC?: boolean) {
+    console.log("<<<OUTGOING>>>", toUserId);
     const oldHop = await this.fetchHop(this.userId, toUserId);
     if (
       oldHop.pc.connectionState === "failed" ||
@@ -334,6 +337,7 @@ export class RPeer extends EventTarget {
     }
     const hop = await this.fetchHop(this.userId, toUserId);
     if (!hop.connected) {
+      console.log("<<<FIRE OUTGOING>>>", toUserId);
       await hop.outgoingConnection(clearPC);
     } else {
       console.log("SKIP CALLING", hop);
