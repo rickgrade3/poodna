@@ -3,6 +3,7 @@ import { AppDB, User } from "@poodna/datatype";
 import { BasicAppStore } from "@poodna/design-system/src";
 import Gun from "gun/gun";
 import { IGunChainReference } from "gun/types/chain";
+import { API_BASE_URL } from "src/const";
 
 class GunStore {
   constructor() {
@@ -10,7 +11,7 @@ class GunStore {
   }
   gun: IGunChainReference<AppDB, any, "pre_root">;
   load_gun() {
-    if (!this.gun) this.gun = Gun<AppDB>(["http://localhost:9002/gun"]);
+    if (!this.gun) this.gun = Gun<AppDB>([`${API_BASE_URL}gun`]);
   }
 }
 export const gunStore = new GunStore();

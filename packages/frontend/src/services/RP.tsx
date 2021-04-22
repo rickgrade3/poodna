@@ -6,6 +6,7 @@ import {
   AvailableEvents,
   AvailableEventsStr,
 } from "@poodna/datatype";
+import { API_BASE_URL } from "src/const";
 interface HopAttr {
   hopKey: string;
   fromId: string;
@@ -247,7 +248,7 @@ export class RPeer extends EventTarget {
   constructor(c: RPeer_Construct) {
     super();
     this.userId = c.userId;
-    this.socket = io("http://localhost:9002/", {
+    this.socket = io(`${API_BASE_URL}`, {
       query: {
         userId: this.userId,
       },
