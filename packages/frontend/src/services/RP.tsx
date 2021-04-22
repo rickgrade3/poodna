@@ -33,10 +33,10 @@ export class Hop {
           username: "webrtc",
         },
         {
-          urls: "stun.l.google.com:19302",
+          urls: ["stun.l.google.com:19302"],
         },
         {
-          urls: "turn:0.peerjs.com:3478",
+          urls: ["turn:0.peerjs.com:3478"],
           username: "peerjs",
           credential: "peerjsp",
         },
