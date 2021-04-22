@@ -19,7 +19,6 @@ const MyLogic = (p: { role: PoodnaRole; users: PoodnaPeerUser[] }) => {
   useEffect(() => {
     console.log(pp.current, ready);
     if (pp.current && ready) {
-      console.log("XXXXX");
       p.users
         .filter((u) => {
           return (
@@ -76,17 +75,18 @@ export default () => {
   const broadcasters: PoodnaPeerUser[] = (r.broadcasters?.list || []).map(
     (v) => ({
       id: v.id,
-      role: "LISTENER",
+      role: "BROADCASTER",
     })
   );
   const listeners: PoodnaPeerUser[] = (r.outsider?.list || []).map((v) => ({
     id: v.id,
     role: "LISTENER",
   }));
-  const users: PoodnaPeerUser[] = []
-    .concat(mainLoops)
-    .concat(listeners)
-    .concat(broadcasters);
+  const users: PoodnaPeerUser[] = _.uniqBy(
+    [].concat(listeners).concat(broadcasters).concat(mainLoops),
+    "id"
+  );
+
   useEffect(() => {
     const role = users.find((u) => u.id === appStore.user.id)?.role;
     if (role) {
