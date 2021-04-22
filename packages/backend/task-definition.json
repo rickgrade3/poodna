@@ -10,7 +10,12 @@
       "portMappings": [
         {
           "hostPort": "0",
-          "containerPort": "9002",
+          "containerPort": "9000",
+          "protocol": "tcp"
+        },
+        {
+          "hostPort": "0",
+          "containerPort": "8675",
           "protocol": "tcp"
         }
       ],
