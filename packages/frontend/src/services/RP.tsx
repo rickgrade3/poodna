@@ -247,7 +247,7 @@ export class RPeer extends EventTarget {
   constructor(c: RPeer_Construct) {
     super();
     this.userId = c.userId;
-    this.socket = io("http://localhost:9000/", {
+    this.socket = io("http://localhost:9002/", {
       query: {
         userId: this.userId,
       },
