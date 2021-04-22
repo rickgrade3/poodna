@@ -7,13 +7,14 @@ export interface PoodnaPeerUser {
 export interface PoodnaConstructor extends RPeer_Construct {
   get_users: () => PoodnaPeerUser[];
 }
-class PoodnaPeer extends RPeer {
+export class PoodnaPeer extends RPeer {
   combinedStream = new MediaStream();
   get_users: PoodnaConstructor["get_users"];
   constructor(c: PoodnaConstructor) {
     super(c);
     this.get_users = c.get_users;
   }
+  onNewUserInRoom(user: PoodnaPeerUser) {}
   mainloops() {
     return this.get_users().filter((u) => u.role === "MAIN_LOOP");
   }
@@ -54,6 +55,13 @@ export class MainLoopPeer extends PoodnaPeer {
   }
   async onConnect(hop: Hop) {
     //Trigger on data change
+  }
+  onNewUserInRoom(user: PoodnaPeerUser) {
+    if (user.role === "BROADCASTER") {
+      this.callToUser(user.id, true);
+    } else if (user.role === "MAIN_LOOP") {
+      this.callToUser(user.id, true);
+    }
   }
 }
 
@@ -121,6 +129,15 @@ export class BroadCasterPeer extends PoodnaPeer {
     }
     return;
   }
+  onNewUserInRoom(user: PoodnaPeerUser) {
+    if (user.role === "BROADCASTER") {
+      this.callToUser(user.id, true);
+    } else if (user.role === "MAIN_LOOP") {
+      this.callToUser(user.id, true);
+    } else if (user.role === "LISTENER") {
+      this.callToUser(user.id, true);
+    }
+  }
 }
 
 export class ListenerPeer extends PoodnaPeer {
@@ -139,5 +156,10 @@ export class ListenerPeer extends PoodnaPeer {
   }
   async onConnect(hop: Hop) {
     //Trigger on data change
+  }
+  onNewUserInRoom(user: PoodnaPeerUser) {
+    if (user.role === "BROADCASTER") {
+      this.callToUser(user.id, true);
+    }
   }
 }

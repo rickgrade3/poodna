@@ -4,6 +4,7 @@ import {
   MainLoopPeer,
   ListenerPeer,
   PoodnaPeerUser,
+  PoodnaPeer,
   PoodnaRole,
 } from "src/services/PoodnaPeer";
 import { appStore } from "src/stores/appStore";
@@ -13,9 +14,26 @@ import { useRoom } from "./RoomProvider";
 */
 const MyLogic = (p: { role: PoodnaRole; users: PoodnaPeerUser[] }) => {
   const users = useRef<PoodnaPeerUser[]>([]);
+  const pp = useRef<PoodnaPeer>();
+  const [ready, setReady] = useState(false);
   useEffect(() => {
-    users.current = p.users;
-  }, [p.users.map((u) => u.id + "_" + u.role)]);
+    console.log(pp.current, ready);
+    if (pp.current && ready) {
+      console.log("XXXXX");
+      p.users
+        .filter((u) => {
+          return (
+            !users.current.find((_u) => _u.id === u.id) &&
+            u.id !== appStore.user.id
+          );
+        })
+        .forEach((newU) => {
+          console.log("new User");
+          pp.current.onNewUserInRoom(newU);
+        });
+      users.current = p.users;
+    }
+  }, [ready, p.users.map((u) => u.id + "_" + u.role).join("_")]);
   useEffect(() => {
     const get_users = () => {
       return users.current;
@@ -36,6 +54,10 @@ const MyLogic = (p: { role: PoodnaRole; users: PoodnaPeerUser[] }) => {
         : p.role === "LISTENER"
         ? new ListenerPeer(x)
         : false;
+    if (peer !== false) {
+      pp.current = peer;
+      setReady(true);
+    }
     return () => {
       if (peer !== true && peer !== false) {
         peer.destroy();
@@ -71,11 +93,16 @@ export default () => {
       console.log("MR", role);
       setMyRole(role);
     }
-  }, [users.map((u) => u.id + "_" + u.role)]);
+  }, [users.map((u) => u.id + "_" + u.role).join("_")]);
   return (
     <>
       <div key={myRole}>
-        {myRole !== "UNKNOWN" && <MyLogic users={users} role={myRole} />}
+        {myRole !== "UNKNOWN" && (
+          <MyLogic
+            users={users.filter((u) => u.id !== appStore.user.id)}
+            role={myRole}
+          />
+        )}
       </div>
     </>
   );
