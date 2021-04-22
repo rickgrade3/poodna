@@ -1,6 +1,6 @@
 import React, { ReactElement, useContext, useEffect, useState } from "react";
 import api from "src/api";
-import RoomLogic from "./RoomLogic";
+import PoodnaPeer from "./PoodnaPeer";
 
 const _useRoom = (_roomId: string) => {
   const roomId = _roomId;
@@ -64,7 +64,7 @@ export const RoomProviderWrapper = (p: {
   return (
     <RoomContext.Provider value={r}>
       {p.children}
-      <RoomLogic />
+      <PoodnaPeer />
     </RoomContext.Provider>
   );
 };
