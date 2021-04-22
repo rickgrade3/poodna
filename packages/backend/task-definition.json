@@ -12,6 +12,11 @@
           "hostPort": "0",
           "containerPort": "9002",
           "protocol": "tcp"
+        },
+        {
+          "hostPort": "0",
+          "containerPort": "8675",
+          "protocol": "tcp"
         }
       ],
       "environment": null,
