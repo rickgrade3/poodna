@@ -33,7 +33,7 @@ export class Hop {
           username: "webrtc",
         },
         {
-          urls: ["stun.l.google.com:19302"],
+          urls: ["stun:stun.l.google.com:19302"],
         },
         {
           urls: ["turn:0.peerjs.com:3478"],
@@ -67,7 +67,7 @@ export class Hop {
         },
       ],
       sdpSemantics: "unified-plan",
-      iceTransportPolicy: "relay",
+      // iceTransportPolicy: "relay",
     } as any;
     this.pc = new RTCPeerConnection(configuration);
     if (!this.isOutgoing) {
