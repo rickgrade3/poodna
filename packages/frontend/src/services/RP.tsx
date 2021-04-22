@@ -20,7 +20,17 @@ export class Hop {
   allStreams: MediaStream[] = [];
   constructor(c: HopAttr) {
     this.attr = c;
-    const configuration = {};
+    const configuration = {
+      iceServers: [
+        {
+          urls: [
+            "stun:stun.l.google.com:19302",
+            "stun:global.stun.twilio.com:3478",
+          ],
+        },
+      ],
+      sdpSemantics: "unified-plan",
+    };
     this.pc = new RTCPeerConnection(configuration);
     if (!this.isOutgoing) {
       const audioEl = document.createElement("audio");
