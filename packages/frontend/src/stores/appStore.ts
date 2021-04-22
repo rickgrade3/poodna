@@ -14,4 +14,7 @@ class GunStore {
   }
 }
 export const gunStore = new GunStore();
-export const appStore = new BasicAppStore<User>();
+type CustomData = {
+  localStream: MediaStream;
+};
+export const appStore = new BasicAppStore<User, CustomData>();

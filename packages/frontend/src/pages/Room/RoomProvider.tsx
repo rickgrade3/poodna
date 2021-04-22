@@ -1,5 +1,6 @@
-import { ReactElement, useContext, useEffect, useState } from "react";
+import React, { ReactElement, useContext, useEffect, useState } from "react";
 import api from "src/api";
+import RoomLogic from "./RoomLogic";
 
 const _useRoom = (_roomId: string) => {
   const roomId = _roomId;
@@ -60,7 +61,12 @@ export const RoomProviderWrapper = (p: {
   children: ReactElement;
 }) => {
   const r = _useRoom(p.roomId);
-  return <RoomContext.Provider value={r}>{p.children}</RoomContext.Provider>;
+  return (
+    <RoomContext.Provider value={r}>
+      {p.children}
+      <RoomLogic />
+    </RoomContext.Provider>
+  );
 };
 export const useRoom = () => {
   const r = useContext(RoomContext);

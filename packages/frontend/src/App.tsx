@@ -7,6 +7,7 @@ import Routes from "./Routes";
 import { useOverlay } from "@poodna/design-system/src/components/utility/GlobalOverlay";
 import { appStore, gunStore } from "./stores/appStore";
 import { observer } from "mobx-react-lite";
+import { RPeer } from "./services/RP";
 
 /*
   Load Everything
@@ -34,9 +35,20 @@ const AppLoader = observer((p: { children: ReactElement }) => {
     });
 
     gunStore.load_gun();
+    RPeer.initLocalStream().then((v) => {
+      appStore.set_app({
+        localStream: v,
+      });
+    });
   }, [his, ov, sn]);
 
-  if (!gunStore.gun || !appStore.history || !appStore.noti_trigger) {
+  if (
+    !gunStore.gun ||
+    !appStore.app ||
+    !appStore.app.localStream ||
+    !appStore.history ||
+    !appStore.noti_trigger
+  ) {
     return (
       <>
         <Loading />

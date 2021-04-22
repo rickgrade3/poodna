@@ -31,13 +31,18 @@ type DialogTrigger<Model> = {
   hide: (m: { id: string }) => void;
 };
 
-export class BasicAppStore<User> {
+export class BasicAppStore<User, AppData> {
   user: User;
   overlays: OverlayModel[];
   history?: any;
+  app?: AppData;
+  set_app(app: AppData | null) {
+    this.app = app;
+  }
   constructor() {
     makeAutoObservable(this);
   }
+
   setUser(user: User | null) {
     this.user = user;
   }
