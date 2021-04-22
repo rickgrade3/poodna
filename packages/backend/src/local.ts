@@ -11,7 +11,7 @@ const io = require("socket.io")(server, {
     origin: "*",
   },
 });
-
+//
 io.on("connection", (socket: any) => {
   console.log("a user connected", socket.handshake.query.userId);
 
@@ -45,7 +45,9 @@ io.on("connection", (socket: any) => {
 const Gun = require("gun");
 const gun = Gun({
   file: "db",
-  web: require("http").createServer(Gun.serve(__dirname)).listen(8765),
+  web: require("http")
+    .createServer(Gun.serve(__dirname))
+    .listen(8765),
   localStorage: true,
 });
 
