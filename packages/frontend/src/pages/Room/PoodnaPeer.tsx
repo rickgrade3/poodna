@@ -13,7 +13,9 @@ import { useRoom } from "./RoomProvider";
 */
 const MyLogic = (p: { role: PoodnaRole; users: PoodnaPeerUser[] }) => {
   const users = useRef<PoodnaPeerUser[]>([]);
-  useEffect(() => {}, [p.users.map((u) => u.id + "_" + u.role)]);
+  useEffect(() => {
+    users.current = p.users;
+  }, [p.users.map((u) => u.id + "_" + u.role)]);
   useEffect(() => {
     const get_users = () => {
       return users.current;
@@ -25,6 +27,7 @@ const MyLogic = (p: { role: PoodnaRole; users: PoodnaPeerUser[] }) => {
       get_users,
       localStream,
     };
+    console.log("p.role", p.role);
     let peer =
       p.role === "MAIN_LOOP"
         ? new MainLoopPeer(x)
@@ -44,7 +47,7 @@ const MyLogic = (p: { role: PoodnaRole; users: PoodnaPeerUser[] }) => {
 export default () => {
   const r = useRoom();
   const [myRole, setMyRole] = useState<PoodnaRole>("UNKNOWN");
-  const mainLoops: PoodnaPeerUser[] = (r.broadcasters?.list || []).map((v) => ({
+  const mainLoops: PoodnaPeerUser[] = (r.mainloop?.list || []).map((v) => ({
     id: v.id,
     role: "MAIN_LOOP",
   }));
@@ -54,7 +57,7 @@ export default () => {
       role: "LISTENER",
     })
   );
-  const listeners: PoodnaPeerUser[] = (r.broadcasters?.list || []).map((v) => ({
+  const listeners: PoodnaPeerUser[] = (r.outsider?.list || []).map((v) => ({
     id: v.id,
     role: "LISTENER",
   }));
@@ -62,7 +65,13 @@ export default () => {
     .concat(mainLoops)
     .concat(listeners)
     .concat(broadcasters);
-
+  useEffect(() => {
+    const role = users.find((u) => u.id === appStore.user.id)?.role;
+    if (role) {
+      console.log("MR", role);
+      setMyRole(role);
+    }
+  }, [users.map((u) => u.id + "_" + u.role)]);
   return (
     <>
       <div key={myRole}>
