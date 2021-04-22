@@ -83,7 +83,7 @@ export default () => {
     role: "LISTENER",
   }));
   const users: PoodnaPeerUser[] = _.uniqBy(
-    [].concat(listeners).concat(broadcasters).concat(mainLoops),
+    [].concat(broadcasters).concat(mainLoops).concat(listeners),
     "id"
   );
 

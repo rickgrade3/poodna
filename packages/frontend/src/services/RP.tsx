@@ -22,9 +22,7 @@ export class Hop {
     this.attr = c;
     const configuration = {
       iceServers: [
-        {
-          urls: "stun:stun.l.google.com:19302",
-        },
+        { url: "stun:stun.l.google.com:19302" },
         {
           urls: "turn:0.peerjs.com:3478",
           username: "peerjs",
@@ -32,7 +30,7 @@ export class Hop {
         },
       ],
       sdpSemantics: "unified-plan",
-    };
+    } as any;
     this.pc = new RTCPeerConnection(configuration);
     if (!this.isOutgoing) {
       const audioEl = document.createElement("audio");
