@@ -90,7 +90,6 @@ export default () => {
   useEffect(() => {
     const role = users.find((u) => u.id === appStore.user.id)?.role;
     if (role) {
-      console.log("MR", role);
       setMyRole(role);
     }
   }, [users.map((u) => u.id + "_" + u.role).join("_")]);

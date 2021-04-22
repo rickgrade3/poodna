@@ -171,12 +171,23 @@ const Inner = () => {
         >
           Set broadcaster
         </MenuItem>
-        <MenuItem icon={<Icons.FaShare />} chevron>
+        <MenuItem
+          onClick={() => {
+            try {
+              appStore.copyURLToClipboard();
+              appStore.success_noti("คัดลอก URL สำเร็จ");
+            } catch {
+              appStore.error_noti("คัดลอก URL ไม่สำเร็จ");
+            }
+          }}
+          icon={<Icons.FaShare />}
+          chevron
+        >
           Share
         </MenuItem>
-        <MenuItem icon={<Icons.FaBug />} chevron>
+        {/* <MenuItem icon={<Icons.FaBug />} chevron>
           Debug
-        </MenuItem>
+        </MenuItem> */}
       </Y>
       <Y>
         <ListenerHeader />
@@ -189,6 +200,14 @@ const Inner = () => {
           right: 2rem;
           width: auto;
         `}
+        onClick={() => {
+          try {
+            appStore.copyURLToClipboard();
+            appStore.success_noti("คัดลอก URL สำเร็จ");
+          } catch {
+            appStore.error_noti("คัดลอก URL ไม่สำเร็จ");
+          }
+        }}
         size="xl"
         variant="primary"
         full={false}
