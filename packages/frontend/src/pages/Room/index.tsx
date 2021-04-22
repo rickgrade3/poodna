@@ -185,9 +185,15 @@ const Inner = () => {
         >
           Share
         </MenuItem>
-        {/* <MenuItem icon={<Icons.FaBug />} chevron>
+        <MenuItem
+          onClick={() => {
+            appStore.error_noti("UNDER CONSTRUCTION");
+          }}
+          icon={<Icons.FaBug />}
+          chevron
+        >
           Debug
-        </MenuItem> */}
+        </MenuItem>
       </Y>
       <Y>
         <ListenerHeader />
