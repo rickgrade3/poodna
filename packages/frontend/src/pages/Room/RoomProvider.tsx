@@ -1,3 +1,4 @@
+import { Loading } from "@poodna/design-system/src";
 import React, { ReactElement, useContext, useEffect, useState } from "react";
 import api from "src/api";
 import { appStore } from "src/stores/appStore";
@@ -9,17 +10,22 @@ const _useRoom = (_roomId: string) => {
   const [room, setRoom] = useState<
     PromiseVal<typeof api.ChatRoom.get.execute>
   >();
+  const [conReady, setConReady] = useState(false);
   useEffect(() => {
     api.ChatRoom.get.execute({ id: roomId }).then((r) => {
       setRoom(r);
     });
   }, []);
   useEffect(() => {
-    api.ChatRoom.add_connection.execute({
-      id: roomId,
-      userId: appStore.user.id,
-      connectionId,
-    });
+    api.ChatRoom.add_connection
+      .execute({
+        id: roomId,
+        userId: appStore.user.id,
+        connectionId,
+      })
+      .then(() => {
+        setConReady(true);
+      });
   }, []);
   const {
     data: connections,
@@ -69,9 +75,22 @@ const _useRoom = (_roomId: string) => {
     outsider,
     total_outsider,
     loading_outsider,
+    conReady,
   };
 };
 const RoomContext = React.createContext<ReturnType<typeof _useRoom>>(undefined);
+
+const Inner = (p: { children: ReactElement }) => {
+  const r = useRoom();
+  if (!r.room || !r.conReady) {
+    return (
+      <>
+        <Loading />
+      </>
+    );
+  }
+  return <>{p.children}</>;
+};
 
 export const RoomProviderWrapper = (p: {
   roomId: string;
@@ -80,8 +99,12 @@ export const RoomProviderWrapper = (p: {
   const r = _useRoom(p.roomId);
   return (
     <RoomContext.Provider value={r}>
-      {p.children}
-      <PoodnaPeer />
+      <Inner>
+        <>
+          {p.children}
+          <PoodnaPeer />
+        </>
+      </Inner>
     </RoomContext.Provider>
   );
 };
