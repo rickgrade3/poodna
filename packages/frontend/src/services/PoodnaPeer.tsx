@@ -1,13 +1,14 @@
+import Peer, { Instance as SimplePeerI } from "simple-peer";
 import { io, Socket } from "socket.io-client";
 import { API_BASE_URL } from "src/const";
-import { SimplePeer, Instance as SimplePeerI } from "simple-peer";
+
 import {
   SEND_DATA,
   AvailableEvents,
   AvailableEventsStr,
 } from "@poodna/datatype";
 import { CgNametag } from "react-icons/cg";
-const Peer: SimplePeer = require("./Peer");
+
 export type PoodnaRole = "BROADCASTER" | "LISTENER" | "MAIN_LOOP" | "UNKNOWN";
 
 export interface PoodnaPeerUser {
