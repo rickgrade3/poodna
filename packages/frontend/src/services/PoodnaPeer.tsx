@@ -234,21 +234,21 @@ export class PoodnaPeer {
             toUserId: userId,
             payload: JSON.stringify(e),
           });
-          peer.on("connect", (e) => {
-            console.log("<<CONNECT>>", userId, this.users[userId]);
-            if (!disableGiveback) {
-              console.log("<<EMIT REQUEST VIDEO>>");
-              this.socket.emit(SEND_DATA, {
-                event: AvailableEvents.requestVideo,
-                fromUserId: this.user.id,
-                conenection_id: connectionId,
-                toUserId: userId,
-              });
-            }
-          });
-          peer.on("error", (e) => {
-            console.log("<<ERROR>>", e, userId);
-          });
+        });
+        peer.on("connect", (e) => {
+          console.log("<<CONNECT>>", userId, this.users[userId]);
+          if (!disableGiveback) {
+            console.log("<<EMIT REQUEST VIDEO>>");
+            this.socket.emit(SEND_DATA, {
+              event: AvailableEvents.requestVideo,
+              fromUserId: this.user.id,
+              conenection_id: connectionId,
+              toUserId: userId,
+            });
+          }
+        });
+        peer.on("error", (e) => {
+          console.log("<<ERROR>>", e, userId);
         });
       },
     });
