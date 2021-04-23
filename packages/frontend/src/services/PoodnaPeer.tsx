@@ -106,7 +106,7 @@ export class PoodnaPeer {
                 console.log("<<STREAM>>", stream, data.fromUserId);
                 const audioEl = document.createElement("audio");
                 audioEl.setAttribute("autoplay", "true");
-                audioEl.setAttribute("controls", "true");
+                // audioEl.setAttribute("controls", "true");
                 document.getElementsByTagName("body")[0].appendChild(audioEl);
                 audioEl.srcObject = stream;
               });
