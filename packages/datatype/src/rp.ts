@@ -1,10 +1,14 @@
 export const SEND_DATA = "send-data";
 export enum AvailableEvents {
-  offer = "offer",
-  answer = "answer",
-  clearPC = "clearPC",
-  ice_candidate = "ice_candidate",
-  ice_candidate_reverse = "ice_candidate_reverse",
+  signal_to_force = "signal_to_force",
+  signal_to = "signal_to",
+  signal_back = "signal_back",
+  data = "data",
+  stream = "stream",
+  track = "track",
+  close = "close",
+  newConnection = "newConnection",
+  requestVideo = "requestVideo",
 }
 export type AvailableEventsStr = keyof typeof AvailableEvents;
 export type SocketData = {

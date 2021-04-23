@@ -40,9 +40,12 @@ const MyLogic = (p: { role: PoodnaRole; users: PoodnaPeerUser[] }) => {
     const userId = appStore.user.id;
     const localStream = appStore.app.localStream;
     const x = {
-      userId,
       get_users,
       localStream,
+      user: {
+        id: userId,
+        role: p.role,
+      },
     };
     console.log("p.role", p.role);
     let peer =

@@ -23,6 +23,7 @@ io.on("connection", (socket: any) => {
     (data: {
       toUserId: string;
       fromUserId: string;
+      conenection_id: string;
       event: AvailableEventsStr;
       clearPC: boolean;
       payload: any;
@@ -31,6 +32,7 @@ io.on("connection", (socket: any) => {
         console.log("emit");
         io.in(data.toUserId).emit(data.event, {
           toUserId: data.toUserId,
+          conenection_id: data.conenection_id,
           fromUserId: data.fromUserId,
           event: data.event,
           clearPC: data.clearPC,

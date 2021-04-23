@@ -1,20 +1,141 @@
-import { RPeer, Hop, SocketEventData, RPeer_Construct } from "./RP";
+import { io, Socket } from "socket.io-client";
+import { API_BASE_URL } from "src/const";
+import { SimplePeer, Instance as SimplePeerI } from "simple-peer";
+import {
+  SEND_DATA,
+  AvailableEvents,
+  AvailableEventsStr,
+} from "@poodna/datatype";
+import { CgNametag } from "react-icons/cg";
+const Peer: SimplePeer = require("./Peer");
 export type PoodnaRole = "BROADCASTER" | "LISTENER" | "MAIN_LOOP" | "UNKNOWN";
+
 export interface PoodnaPeerUser {
   id: string;
   role: PoodnaRole;
 }
-export interface PoodnaConstructor extends RPeer_Construct {
+
+export type SocketEventData = {
+  toUserId: string;
+  conenection_id: string;
+  fromUserId: string;
+  event: AvailableEventsStr;
+  payload: any;
+};
+
+export interface PoodnaConstructor {
   get_users: () => PoodnaPeerUser[];
+  localStream: MediaStream;
+  user: PoodnaPeerUser;
 }
-export class PoodnaPeer extends RPeer {
+type Hop =
+  | {
+      channel: string;
+      userId: string;
+      peer: SimplePeerI;
+      conenection_id: string;
+    }
+  | undefined
+  | null;
+export class PoodnaPeer {
   combinedStream = new MediaStream();
   get_users: PoodnaConstructor["get_users"];
+  localStream: MediaStream;
+  users: {
+    [userId: string]:
+      | {
+          outgoing?: Hop;
+          incoming?: Hop;
+          give_back_outgoing?: Hop;
+          give_back_incoming?: Hop;
+        }
+      | undefined;
+  };
+  user: PoodnaPeerUser;
+
+  socket: Socket;
+  conenection_id: string;
+
   constructor(c: PoodnaConstructor) {
-    super(c);
     this.get_users = c.get_users;
+    this.conenection_id = Math.random().toString();
+    this.users = {};
+    this.localStream = c.localStream;
+    this.user = c.user;
+
+    this.socket = io(`${API_BASE_URL}`, {
+      query: {
+        userId: this.user.id,
+      },
+    });
+    this.socket.onAny(async (e: AvailableEventsStr, data: SocketEventData) => {
+      if (!data.fromUserId) {
+        return;
+      }
+      console.log("<<SOCKET>>", data.event, data);
+      switch (data.event) {
+        case AvailableEvents.requestVideo: {
+          this.outgoingCall(data.fromUserId, data.conenection_id, true);
+        }
+        case AvailableEvents.signal_to: {
+          const h = this.fetchHop(data.fromUserId, data.conenection_id, false, {
+            onCreated: (peer) => {
+              console.log("BINDSIGNAL");
+              peer.on("signal", (e) => {
+                console.log("EMIT SIGNAL IN");
+                this.socket.emit(SEND_DATA, {
+                  event: AvailableEvents.signal_back,
+                  conenection_id: data.conenection_id,
+                  fromUserId: this.user.id,
+                  toUserId: data.fromUserId,
+                  payload: JSON.stringify(e),
+                });
+              });
+              peer.on("connect", (e) => {
+                console.log(
+                  "<<CONNECT>>",
+                  data.fromUserId,
+                  this.users[data.fromUserId]
+                );
+              });
+              peer.on("error", (e) => {
+                console.log("<<ERROR>>", e, data.fromUserId);
+              });
+              peer.on("stream", (stream) => {
+                console.log("<<STREAM>>", stream, data.fromUserId);
+                const audioEl = document.createElement("audio");
+                audioEl.setAttribute("autoplay", "true");
+                audioEl.setAttribute("controls", "true");
+                document.getElementsByTagName("body")[0].appendChild(audioEl);
+                audioEl.srcObject = stream;
+              });
+            },
+          });
+          h.peer.signal(data.payload);
+
+          break;
+        }
+        case AvailableEvents.signal_back: {
+          //Fetch outging hop
+          const h = this.fetchHop(data.fromUserId, data.conenection_id, true, {
+            onCreated: () => {
+              console.log("MUST NOT HAPPEN");
+            },
+          });
+          h.peer.signal(data.payload);
+          break;
+        }
+      }
+    });
+    this.socket.emit("");
   }
-  onNewUserInRoom(user: PoodnaPeerUser) {}
+  async onOffer(data: SocketEventData) {
+    console.log("<<EMIT ONOFFER>>", this.users, data);
+    this.outgoingCall(data.fromUserId, data.conenection_id);
+  }
+  onNewUserInRoom(user: PoodnaPeerUser) {
+    this.outgoingCall(user.id, Math.random().toString());
+  }
   mainloops() {
     return this.get_users().filter((u) => u.role === "MAIN_LOOP");
   }
@@ -24,126 +145,125 @@ export class PoodnaPeer extends RPeer {
   listeners() {
     return this.get_users().filter((u) => u.role === "LISTENER");
   }
-}
-export class MainLoopPeer extends PoodnaPeer {
-  async onOffer(data: SocketEventData) {
-    //Connect back if it is mainLoopIds
-    this.callToUser(data.fromUserId);
-  }
-  // async shouldAcceptOffer(data: SocketEventData) {
-  //   //Accept incoming if broadcaster or mainloop
-  //   return (
-  //     this.mainloops()
-  //       .map((u) => u.id)
-  //       .indexOf(data.fromUserId) >= 0 ||
-  //     this.broadcasters()
-  //       .map((u) => u.id)
-  //       .indexOf(data.fromUserId) >= 0
-  //   );
-  // }
-  async onConnect(hop: Hop) {
-    //Trigger on data change
-  }
-  onNewUserInRoom(user: PoodnaPeerUser) {
-    this.callToUser(user.id, true);
-  }
-}
-
-export class BroadCasterPeer extends PoodnaPeer {
-  outsiders_outgoing: Hop[] = [];
-
-  combinedStream = new MediaStream();
-
-  async onOffer(data: SocketEventData) {
-    //Connect back if it is mainLoopIds and outsider ids
+  fetchHop(
+    userId: string,
+    conenection_id: string,
+    outgoing: boolean,
+    cb: { onCreated?: (p: SimplePeerI) => void }
+  ) {
     if (
-      this.mainloops()
-        .map((u) => u.id)
-        .indexOf(data.fromUserId) >= 0
+      outgoing &&
+      this.users[userId]?.outgoing &&
+      this.users[userId]?.outgoing.conenection_id !== conenection_id
     ) {
-      const hop = await this.callToUser(data.fromUserId);
-    } else if (
-      this.listeners()
-        .map((u) => u.id)
-        .indexOf(data.fromUserId) >= 0
-    ) {
-      const hop = await this.callToUser(data.fromUserId);
-      if (hop) {
-        this.outsiders_outgoing.push(hop);
-      }
+      this.users[userId].outgoing?.peer.destroy();
+      delete this.users[userId].outgoing;
+      console.log("CLEAR OUTGOING");
     }
-  }
-  // async shouldAcceptOffer(data: SocketEventData) {
-  //   //Connect accept if it is mainLoopIds
-  //   return (
-  //     this.mainloops()
-  //       .map((u) => u.id)
-  //       .indexOf(data.fromUserId) >= 0
-  //   );
-  // }
-  selectStream(fromId: string, toId: string) {
-    //Use combine stream if it is connection to outsider
     if (
-      this.listeners()
-        .map((u) => u.id)
-        .indexOf(toId) >= 0
+      !outgoing &&
+      this.users[userId]?.incoming &&
+      this.users[userId]?.incoming.conenection_id !== conenection_id
     ) {
-      return this.combinedStream;
+      this.users[userId].incoming?.peer.destroy();
+      delete this.users[userId].incoming;
+      console.log("CLEAR INCOMING");
     }
-    return this.localStream;
-  }
-  async onConnect(hop: Hop) {
-    //Trigger on data change
-  }
-  async onDeleteHop(hop: Hop) {
-    for (const stream of hop.allStreams) {
-      for (const t of stream.getTracks()) {
-        this.combinedStream.removeTrack(t);
-      }
-    }
-  }
-  async onStream(mediaStream: MediaStream, hop: Hop) {
-    //When got new stream then combined
+    let h = this.users[userId];
 
-    this.combinedStream.addTrack(mediaStream.getTracks()[0]);
-    console.log("this.combinedStream", this.combinedStream.getTracks());
-    for (const outsider of this.outsiders_outgoing) {
-      outsider.onStreamChange();
-      outsider.outgoingConnection();
+    if (!h) {
+      h = {
+        outgoing: null,
+        incoming: null,
+      };
+      this.users[userId] = h;
     }
-    return;
+    const _onCreated = (p: SimplePeerI) => {
+      cb.onCreated?.(p);
+    };
+    if (outgoing && (!h.outgoing || h.outgoing.peer.destroyed)) {
+      const channel = Math.random().toString();
+      let op = new Peer({
+        channelName: channel,
+        initiator: true,
+        stream: this.localStream,
+      });
+      _onCreated(op);
+      h.outgoing = {
+        conenection_id,
+        peer: op,
+        channel,
+        userId,
+      };
+    } else if (!outgoing && (!h.incoming || h.incoming.peer.destroyed)) {
+      const channel = Math.random().toString();
+      let op = new Peer({
+        channelName: channel,
+      });
+      _onCreated(op);
+
+      h.incoming = {
+        conenection_id,
+        peer: op,
+        channel,
+        userId,
+      };
+    }
+    if (outgoing) {
+      return this.users[userId].outgoing;
+    } else {
+      return this.users[userId].incoming;
+    }
   }
-  onNewUserInRoom(user: PoodnaPeerUser) {
-    if (user.role === "BROADCASTER") {
-      this.callToUser(user.id, true);
-    } else if (user.role === "MAIN_LOOP") {
-      this.callToUser(user.id, true);
-    } else if (user.role === "LISTENER") {
-      this.callToUser(user.id, true);
-    }
+  outgoingCall(
+    userId: string,
+    connectionId: string,
+    disableGiveback?: boolean
+  ) {
+    const h = this.fetchHop(userId, connectionId, true, {
+      onCreated: (peer) => {
+        console.log("BINDSIGNAL");
+        peer.on("signal", (e) => {
+          //Make connection to peer
+          console.log("EMIT SIGNAL OUT");
+          this.socket.emit(SEND_DATA, {
+            event: AvailableEvents.signal_to,
+            fromUserId: this.user.id,
+            conenection_id: connectionId,
+            toUserId: userId,
+            payload: JSON.stringify(e),
+          });
+          peer.on("connect", (e) => {
+            console.log("<<CONNECT>>", userId, this.users[userId]);
+            if (!disableGiveback) {
+              console.log("<<EMIT REQUEST VIDEO>>");
+              this.socket.emit(SEND_DATA, {
+                event: AvailableEvents.requestVideo,
+                fromUserId: this.user.id,
+                conenection_id: connectionId,
+                toUserId: userId,
+              });
+            }
+          });
+          peer.on("error", (e) => {
+            console.log("<<ERROR>>", e, userId);
+          });
+        });
+      },
+    });
+  }
+  destroy() {
+    _.each(this.users, (v) => {
+      v.incoming?.peer.destroy();
+      v.outgoing?.peer.destroy();
+    });
+    this.socket.disconnect();
+    this.socket.offAny();
   }
 }
 
-export class ListenerPeer extends PoodnaPeer {
-  combinedStream = new MediaStream();
+export class MainLoopPeer extends PoodnaPeer {}
 
-  async onOffer(data: SocketEventData) {
-    //Do not connect back
-  }
-  // async shouldAcceptOffer(data: SocketEventData) {
-  //   //Do not accept any offer
-  //   return (
-  //     this.broadcasters()
-  //       .map((b) => b.id)
-  //       .indexOf(data.fromUserId) >= 0
-  //   );
-  // }
-  async onConnect(hop: Hop) {
-    //Trigger on data change
-  }
-  onNewUserInRoom(user: PoodnaPeerUser) {
-    if (user.role === "BROADCASTER") {
-      this.callToUser(user.id, true);
-    }
-  }
-}
+export class BroadCasterPeer extends PoodnaPeer {}
+
+export class ListenerPeer extends PoodnaPeer {}
