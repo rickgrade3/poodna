@@ -136,15 +136,15 @@ const Listeners = () => {
 };
 const Inner = () => {
   const r = useRoom();
-  // useEffect(() => {
-  //   if (r.room?.item?.ownerId !== appStore.user.id) {
-  //     console.log("Add outsider");
-  //     api.ChatRoom.add_outsider.execute({
-  //       id: r.room?.item.id || "",
-  //       userId: appStore.user.id,
-  //     });
-  //   }
-  // }, [r.room?.item]);
+  useEffect(() => {
+    if (r.room?.item?.ownerId !== appStore.user.id) {
+      console.log("Add outsider");
+      api.ChatRoom.add_outsider.execute({
+        id: r.room?.item.id || "",
+        userId: appStore.user.id,
+      });
+    }
+  }, []);
   if (!r.room) {
     return <></>;
   }

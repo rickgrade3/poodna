@@ -78,6 +78,11 @@ export class PoodnaPeer {
       }
       console.log("<<SOCKET>>", data.event, data);
       switch (data.event) {
+        case AvailableEvents.need_retry: {
+          console.log("RETRY CONNECTION");
+          this.outgoingCall(data.fromUserId, Math.random().toString());
+          break;
+        }
         case AvailableEvents.signal_to: {
           const h = this.fetchHop(data.fromUserId, data.conenection_id, false, {
             onCreated: (peer) => {
@@ -101,6 +106,13 @@ export class PoodnaPeer {
               });
               peer.on("error", (e) => {
                 console.log("<<ERROR>>", e, data.fromUserId);
+                console.log("RETRY REQUEST");
+                this.socket.emit(SEND_DATA, {
+                  event: AvailableEvents.need_retry,
+                  conenection_id: data.conenection_id,
+                  fromUserId: this.user.id,
+                  toUserId: data.fromUserId,
+                });
               });
               peer.on("stream", (stream) => {
                 console.log("<<STREAM>>", stream, data.fromUserId);
