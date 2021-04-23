@@ -1,9 +1,11 @@
 import React, { ReactElement, useContext, useEffect, useState } from "react";
 import api from "src/api";
+import { appStore } from "src/stores/appStore";
 import PoodnaPeer from "./PoodnaPeer";
 
 const _useRoom = (_roomId: string) => {
   const roomId = _roomId;
+  const connectionId = Math.random().toString();
   const [room, setRoom] = useState<
     PromiseVal<typeof api.ChatRoom.get.execute>
   >();
@@ -12,6 +14,19 @@ const _useRoom = (_roomId: string) => {
       setRoom(r);
     });
   }, []);
+  useEffect(() => {
+    api.ChatRoom.add_connection.execute({
+      id: roomId,
+      userId: appStore.user.id,
+      connectionId,
+    });
+  }, []);
+  const {
+    data: connections,
+    loading: loading_connections,
+  } = api.ChatRoom.list_connections.hook({
+    id: roomId,
+  });
   const {
     data: broadcasters,
     loading: loading_broadcasters,
@@ -41,6 +56,8 @@ const _useRoom = (_roomId: string) => {
         .map((d) => d.id)
     ).length,
     room,
+    connections,
+    loading_connections,
     setRoom,
     roomId,
     broadcasters,

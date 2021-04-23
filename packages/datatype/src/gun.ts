@@ -11,6 +11,12 @@ export interface ChatRoom {
   maximum: number;
   ownerId: string;
   auto_pick_broadcaster: boolean;
+  connections: {
+    [userId: string]: {
+      connectionId: string;
+      userId: string;
+    };
+  };
   broadcasters: {
     [userId: string]: User;
   };

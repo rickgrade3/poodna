@@ -22,7 +22,7 @@ const MyLogic = (p: { role: PoodnaRole; users: PoodnaPeerUser[] }) => {
       p.users
         .filter((u) => {
           return (
-            !users.current.find((_u) => _u.id === u.id) &&
+            !users.current.find((_u) => _u.connectionId === u.connectionId) &&
             u.id !== appStore.user.id
           );
         })
@@ -32,7 +32,11 @@ const MyLogic = (p: { role: PoodnaRole; users: PoodnaPeerUser[] }) => {
         });
       users.current = p.users;
     }
-  }, [ready, p.users.map((u) => u.id + "_" + u.role).join("_")]);
+  }, [
+    ready,
+    p.users.map((u) => u.connectionId + "_" + u.id + "_" + u.role).join("_"),
+  ]);
+  console.log(p.users);
   useEffect(() => {
     const get_users = () => {
       return users.current;
@@ -70,19 +74,26 @@ const MyLogic = (p: { role: PoodnaRole; users: PoodnaPeerUser[] }) => {
 };
 export default () => {
   const r = useRoom();
+  console.log(r.connections);
   const [myRole, setMyRole] = useState<PoodnaRole>("UNKNOWN");
   const mainLoops: PoodnaPeerUser[] = (r.mainloop?.list || []).map((v) => ({
     id: v.id,
+    connectionId: (r.connections?.list || []).find((d) => d.userId === v.id)
+      ?.connectionId,
     role: "MAIN_LOOP",
   }));
   const broadcasters: PoodnaPeerUser[] = (r.broadcasters?.list || []).map(
     (v) => ({
       id: v.id,
+      connectionId: (r.connections?.list || []).find((d) => d.userId === v.id)
+        ?.connectionId,
       role: "BROADCASTER",
     })
   );
   const listeners: PoodnaPeerUser[] = (r.outsider?.list || []).map((v) => ({
     id: v.id,
+    connectionId: (r.connections?.list || []).find((d) => d.userId === v.id)
+      ?.connectionId,
     role: "LISTENER",
   }));
   const users: PoodnaPeerUser[] = _.uniqBy(
@@ -96,12 +107,15 @@ export default () => {
       setMyRole(role);
     }
   }, [users.map((u) => u.id + "_" + u.role).join("_")]);
+  console.log("users", users);
   return (
     <>
       <div key={myRole}>
         {myRole !== "UNKNOWN" && (
           <MyLogic
-            users={users.filter((u) => u.id !== appStore.user.id)}
+            users={users.filter(
+              (u) => u.id !== appStore.user.id && u.connectionId
+            )}
             role={myRole}
           />
         )}

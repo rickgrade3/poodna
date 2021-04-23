@@ -13,6 +13,7 @@ export type PoodnaRole = "BROADCASTER" | "LISTENER" | "MAIN_LOOP" | "UNKNOWN";
 
 export interface PoodnaPeerUser {
   id: string;
+  connectionId?: string;
   role: PoodnaRole;
 }
 
@@ -75,10 +76,6 @@ export class PoodnaPeer {
       }
       console.log("<<SOCKET>>", data.event, data);
       switch (data.event) {
-        case AvailableEvents.requestVideo: {
-          this.outgoingCall(data.fromUserId, data.conenection_id, true);
-          break;
-        }
         case AvailableEvents.signal_to: {
           const h = this.fetchHop(data.fromUserId, data.conenection_id, false, {
             onCreated: (peer) => {
@@ -131,10 +128,7 @@ export class PoodnaPeer {
     });
     this.socket.emit("");
   }
-  async onOffer(data: SocketEventData) {
-    console.log("<<EMIT ONOFFER>>", this.users, data);
-    this.outgoingCall(data.fromUserId, data.conenection_id);
-  }
+  async onOffer(data: SocketEventData) {}
   onNewUserInRoom(user: PoodnaPeerUser) {
     this.outgoingCall(user.id, Math.random().toString());
   }
@@ -217,11 +211,7 @@ export class PoodnaPeer {
       return this.users[userId].incoming;
     }
   }
-  outgoingCall(
-    userId: string,
-    connectionId: string,
-    disableGiveback?: boolean
-  ) {
+  outgoingCall(userId: string, connectionId: string) {
     const h = this.fetchHop(userId, connectionId, true, {
       onCreated: (peer) => {
         console.log("BINDSIGNAL");
@@ -238,15 +228,6 @@ export class PoodnaPeer {
         });
         peer.on("connect", (e) => {
           console.log("<<CONNECT>>", userId, this.users[userId]);
-          if (!disableGiveback) {
-            console.log("<<EMIT REQUEST VIDEO>>");
-            this.socket.emit(SEND_DATA, {
-              event: AvailableEvents.requestVideo,
-              fromUserId: this.user.id,
-              conenection_id: connectionId,
-              toUserId: userId,
-            });
-          }
         });
         peer.on("error", (e) => {
           console.log("<<ERROR>>", e, userId);

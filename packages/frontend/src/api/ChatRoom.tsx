@@ -12,7 +12,10 @@ export default {
     },
   }),
   create: APIGen<
-    Omit<ChatRoom, "id" | "broadcasters" | "mainloops" | "outsiders">,
+    Omit<
+      ChatRoom,
+      "id" | "broadcasters" | "mainloops" | "outsiders" | "connections"
+    >,
     { item: ChatRoom },
     ChatRoom
   >({
@@ -26,6 +29,7 @@ export default {
           broadcasters: {},
           mainloops: {},
           outsiders: {},
+          connections: {},
           ...p,
         })
         .back()
@@ -148,6 +152,39 @@ export default {
         .get("outsiders")
         .get(p.userId)
         .put(gun.get("users").get(p.userId) as any);
+    },
+    value: (res, gun, prev) => {
+      return {
+        list: [...(prev?.list || []), res],
+      };
+    },
+  }),
+  add_connection: APIGen<
+    { id: string; userId: string; connectionId: string },
+    { list: { connectionId: string; userId: string }[] },
+    { connectionId: string; userId: string }
+  >({
+    exec: (p, gun) => {
+      return gun
+        .get("rooms")
+        .get(p.id)
+        .get("connections")
+        .get(p.userId)
+        .put({ connectionId: p.connectionId, userId: p.userId });
+    },
+    value: (res, gun, prev) => {
+      return {
+        list: [...(prev?.list || []), res],
+      };
+    },
+  }),
+  list_connections: APIGen<
+    { id: string },
+    { list: { connectionId: string; userId: string }[] },
+    { connectionId: string; userId: string }
+  >({
+    exec: (p, gun) => {
+      return gun.get("rooms").get(p.id).get("connections").map();
     },
     value: (res, gun, prev) => {
       return {
