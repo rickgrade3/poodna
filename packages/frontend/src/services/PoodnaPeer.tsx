@@ -35,6 +35,8 @@ type Hop =
       channel: string;
       userId: string;
       peer: SimplePeerI;
+      audioEl?: HTMLAudioElement;
+      stream?: MediaStream;
       conenection_id: string;
     }
   | undefined
@@ -102,11 +104,16 @@ export class PoodnaPeer {
               });
               peer.on("stream", (stream) => {
                 console.log("<<STREAM>>", stream, data.fromUserId);
-                const audioEl = document.createElement("audio");
-                audioEl.setAttribute("autoplay", "true");
-                // audioEl.setAttribute("controls", "true");
-                document.getElementsByTagName("body")[0].appendChild(audioEl);
-                audioEl.srcObject = stream;
+                if (!h.audioEl) {
+                  h.audioEl = document.createElement("audio");
+                  document
+                    .getElementsByTagName("body")[0]
+                    .appendChild(h.audioEl);
+                }
+
+                h.audioEl.setAttribute("autoplay", "true");
+                h.stream = stream;
+                h.audioEl.srcObject = stream;
               });
             },
           });
@@ -153,6 +160,9 @@ export class PoodnaPeer {
       this.users[userId]?.outgoing.conenection_id !== conenection_id
     ) {
       this.users[userId].outgoing?.peer.destroy();
+      if (this.users[userId].outgoing.audioEl) {
+        this.users[userId].outgoing.audioEl.remove();
+      }
       delete this.users[userId].outgoing;
       console.log("CLEAR OUTGOING");
     }
@@ -162,6 +172,9 @@ export class PoodnaPeer {
       this.users[userId]?.incoming.conenection_id !== conenection_id
     ) {
       this.users[userId].incoming?.peer.destroy();
+      if (this.users[userId].incoming.audioEl) {
+        this.users[userId].incoming.audioEl.remove();
+      }
       delete this.users[userId].incoming;
       console.log("CLEAR INCOMING");
     }
@@ -239,6 +252,12 @@ export class PoodnaPeer {
     _.each(this.users, (v) => {
       v.incoming?.peer.destroy();
       v.outgoing?.peer.destroy();
+      if (v.incoming?.audioEl) {
+        v.incoming?.audioEl.remove();
+      }
+      if (v.outgoing?.audioEl) {
+        v.outgoing?.audioEl.remove();
+      }
     });
     this.socket.disconnect();
     this.socket.offAny();
