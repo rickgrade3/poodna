@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import api from "src/api";
 import {
   BroadCasterPeer,
   MainLoopPeer,
@@ -12,7 +13,11 @@ import { useRoom } from "./RoomProvider";
 /*
     WEBRTC LOGIC FOR CURRENT USER
 */
-const MyLogic = (p: { role: PoodnaRole; users: PoodnaPeerUser[] }) => {
+const MyLogic = (p: {
+  roomId: string;
+  role: PoodnaRole;
+  users: PoodnaPeerUser[];
+}) => {
   const users = useRef<PoodnaPeerUser[]>([]);
   const pp = useRef<PoodnaPeer>();
   const [ready, setReady] = useState(false);
@@ -62,8 +67,19 @@ const MyLogic = (p: { role: PoodnaRole; users: PoodnaPeerUser[] }) => {
         : false;
     if (peer !== false) {
       pp.current = peer;
-      setReady(true);
     }
+    const connectionId = Math.random().toString();
+
+    api.ChatRoom.add_connection
+      .execute({
+        id: p.roomId,
+        userId: appStore.user.id,
+        connectionId,
+      })
+      .then(() => {
+        setReady(true);
+      });
+
     return () => {
       if (peer !== true && peer !== false) {
         peer.destroy();
@@ -111,8 +127,9 @@ export default () => {
   return (
     <>
       <div key={myRole}>
-        {myRole !== "UNKNOWN" && (
+        {myRole !== "UNKNOWN" && r.room?.item && (
           <MyLogic
+            roomId={r.room.item.id}
             users={users.filter(
               (u) => u.id !== appStore.user.id && u.connectionId
             )}

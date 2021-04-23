@@ -6,27 +6,17 @@ import PoodnaPeer from "./PoodnaPeer";
 
 const _useRoom = (_roomId: string) => {
   const roomId = _roomId;
-  const connectionId = Math.random().toString();
+
   const [room, setRoom] = useState<
     PromiseVal<typeof api.ChatRoom.get.execute>
   >();
-  const [conReady, setConReady] = useState(false);
+
   useEffect(() => {
     api.ChatRoom.get.execute({ id: roomId }).then((r) => {
       setRoom(r);
     });
   }, []);
-  useEffect(() => {
-    api.ChatRoom.add_connection
-      .execute({
-        id: roomId,
-        userId: appStore.user.id,
-        connectionId,
-      })
-      .then(() => {
-        setConReady(true);
-      });
-  }, []);
+
   const {
     data: connections,
     loading: loading_connections,
@@ -75,20 +65,13 @@ const _useRoom = (_roomId: string) => {
     outsider,
     total_outsider,
     loading_outsider,
-    conReady,
   };
 };
 const RoomContext = React.createContext<ReturnType<typeof _useRoom>>(undefined);
 
 const Inner = (p: { children: ReactElement }) => {
   const r = useRoom();
-  if (!r.room || !r.conReady) {
-    return (
-      <>
-        <Loading />
-      </>
-    );
-  }
+
   return <>{p.children}</>;
 };
 
