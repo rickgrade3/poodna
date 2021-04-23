@@ -76,6 +76,7 @@ export class PoodnaPeer {
       switch (data.event) {
         case AvailableEvents.requestVideo: {
           this.outgoingCall(data.fromUserId, data.conenection_id, true);
+          break;
         }
         case AvailableEvents.signal_to: {
           const h = this.fetchHop(data.fromUserId, data.conenection_id, false, {
