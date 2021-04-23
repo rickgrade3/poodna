@@ -137,7 +137,26 @@ export class PoodnaPeer {
   }
   async onOffer(data: SocketEventData) {}
   onNewUserInRoom(user: PoodnaPeerUser) {
+    this.clearHop(user.id);
     this.outgoingCall(user.id, Math.random().toString());
+  }
+  clearHop(userId: string) {
+    if (this.users[userId]?.outgoing) {
+      this.users[userId].outgoing?.peer.destroy();
+      if (this.users[userId].outgoing.audioEl) {
+        this.users[userId].outgoing.audioEl.remove();
+      }
+      delete this.users[userId].outgoing;
+      console.log("CLEAR HOP OUTGOING");
+    }
+    if (this.users[userId]?.incoming) {
+      this.users[userId].incoming?.peer.destroy();
+      if (this.users[userId].incoming.audioEl) {
+        this.users[userId].incoming.audioEl.remove();
+      }
+      delete this.users[userId].incoming;
+      console.log("CLEAR HOP INCOMING");
+    }
   }
   mainloops() {
     return this.get_users().filter((u) => u.role === "MAIN_LOOP");
