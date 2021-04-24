@@ -121,13 +121,13 @@ export class PoodnaPeer {
               });
               peer.on("connect", (e) => {});
               peer.on("error", (e) => {
-                this.logTo(AvailableEvents.need_retry, data.fromUserId);
-                this.socket.emit(SEND_DATA, {
-                  event: AvailableEvents.need_retry,
-                  conenection_id: data.conenection_id,
-                  fromUserId: this.user.id,
-                  toUserId: data.fromUserId,
-                });
+                // this.logTo(AvailableEvents.need_retry, data.fromUserId);
+                // this.socket.emit(SEND_DATA, {
+                //   event: AvailableEvents.need_retry,
+                //   conenection_id: data.conenection_id,
+                //   fromUserId: this.user.id,
+                //   toUserId: data.fromUserId,
+                // });
               });
               peer.on("stream", (stream) => {
                 this.logFrom("GOT STREAM", data.fromUserId);
