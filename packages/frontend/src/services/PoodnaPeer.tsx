@@ -1,7 +1,6 @@
 import Peer, { Instance as SimplePeerI } from "simple-peer";
 import { io, Socket } from "socket.io-client";
 import { API_BASE_URL } from "src/const";
-
 import {
   SEND_DATA,
   AvailableEvents,
@@ -9,16 +8,14 @@ import {
 } from "@poodna/datatype";
 import { CgNametag } from "react-icons/cg";
 
-export type PoodnaRole = "BROADCASTER" | "LISTENER" | "MAIN_LOOP" | "UNKNOWN";
-
 export interface PoodnaPeerUser {
   id: string;
-  name?: string;
-  avatar?: string;
-  connectionId?: string;
-  role: PoodnaRole;
+  name: string;
+  connectionId: string;
+  speaker: boolean;
+  broadcaster: boolean;
+  role: string;
 }
-
 export type SocketEventData = {
   toUserId: string;
   conenection_id: string;
@@ -27,98 +24,168 @@ export type SocketEventData = {
   payload: any;
 };
 
-export interface PoodnaConstructor {
-  get_users: () => PoodnaPeerUser[];
-  localStream: MediaStream;
-  user: PoodnaPeerUser;
-  onConnect: () => any;
-}
-type Hop =
-  | {
-      channel: string;
-      userId: string;
-      peer: SimplePeerI;
-      audioEl?: HTMLAudioElement;
-      stream?: MediaStream;
-      conenection_id: string;
-      activityAt: Date;
+//Recienved the sound
+export class IncomingHop {
+  me: PoodnaPeer;
+  userId: string;
+  constructor(c: { me: PoodnaPeer; userId: string }) {
+    this.me = c.me;
+    this.userId = c.userId;
+    this.peer = new Peer({
+      stream: this.me.localStream,
+    });
+    this.me.socket.onAny(this.handleSocket.bind(this));
+  }
+  async handleSocket(e: AvailableEventsStr, data: SocketEventData) {
+    if (data.fromUserId !== this.userId) {
+      return;
     }
-  | undefined
-  | null;
-export class PoodnaPeer {
-  combinedStream = new MediaStream();
-  get_users: PoodnaConstructor["get_users"];
-  localStream: MediaStream;
-  users: {
-    [userId: string]:
-      | {
-          outgoing?: Hop;
-          incoming?: Hop;
-          createdAt: Date;
-        }
-      | undefined;
-  };
-  user: PoodnaPeerUser;
+    switch (data.event) {
+      case AvailableEvents.signal_to: {
+        this.me.logFrom(AvailableEvents.signal_to, data.fromUserId);
 
-  socket: Socket;
-  conenection_id: string;
+        this.peer.on("signal", (e) => {
+          this.me.logTo(AvailableEvents.signal_back, data.fromUserId);
+          this.me.socket.emit(SEND_DATA, {
+            event: AvailableEvents.signal_back,
+            fromUserId: this.me.user.id,
+            connection_Id: this.me.user.connectionId,
+            toUserId: data.fromUserId,
+            payload: JSON.stringify(e),
+          });
+        });
+        this.peer.on("connect", (e) => {
+          this.me.logFrom("SOUND SENDED", data.fromUserId);
+        });
+        this.peer.on("error", (e) => {
+          this.me.logFrom("ERROR:" + e, data.fromUserId);
+        });
+        this.peer.on("stream", (stream) => {
+          this.me.logFrom("GOT STREAM", data.fromUserId);
+          console.log(this.me.incomings, this.me.get_users());
+          if (!this.audioEl) {
+            this.audioEl = document.createElement("audio");
+            document.getElementsByTagName("body")[0].appendChild(this.audioEl);
+          }
+          this.audioEl.setAttribute("autoplay", "true");
+          this.stream = stream;
+          this.audioEl.srcObject = stream;
+        });
+        if (!this.peer.destroyed) this.peer.signal(data.payload);
 
-  _log(m: string) {
-    console.log(`${new Date().getTime()}:${this.user.role}:${m}`);
+        break;
+      }
+    }
   }
-  logTo(m: string, toUserId: string) {
-    const u = this.get_users().find((u) => u.id === toUserId);
-    let username = u ? u?.name + "/" + u?.role : toUserId;
-
-    this._log(`TO:${username}:${m}`);
+  request() {
+    this.requestAt = new Date();
+    this.me.logTo(AvailableEvents.request_sound, this.me.user.id);
+    this.me.socket.emit(SEND_DATA, {
+      event: AvailableEvents.request_sound,
+      fromUserId: this.me.user.id,
+      connection_Id: this.me.user.connectionId,
+      toUserId: this.userId,
+      payload: "",
+    });
   }
-  logFrom(m: string, toUserId: string) {
-    const u = this.get_users().find((u) => u.id === toUserId);
-    let username = u ? u?.name + "/" + u?.role : toUserId;
-    this._log(`FROM:${username}:${m}`);
+  requestAt?: Date;
+  peer?: SimplePeerI;
+  stream?: MediaStream;
+  audioEl?: HTMLAudioElement;
+  destroy() {
+    this.me.socket.offAny(this.handleSocket.bind(this));
+    if (this.peer) {
+      this.peer.destroy();
+    }
+    delete this.me.incomings[this.userId];
+  }
+  healthcheck() {}
+}
+//Give the sound to the others
+export class OutgoingHop {
+  me: PoodnaPeer;
+  userId: string;
+  constructor(c: { me: PoodnaPeer; userId: string }) {
+    this.me = c.me;
+    this.userId = c.userId;
+    this.peer = new Peer({
+      initiator: true,
+      stream: this.me.localStream,
+    });
+    this.me.socket.onAny(this.handleSocket.bind(this));
+  }
+  async handleSocket(e: AvailableEventsStr, data: SocketEventData) {
+    if (!data.fromUserId) {
+      return;
+    }
+    switch (data.event) {
+      case AvailableEvents.signal_back: {
+        this.me.logFrom(AvailableEvents.signal_back, data.fromUserId);
+        if (!this.peer.destroyed) this.peer.signal(data.payload);
+        break;
+      }
+    }
+  }
+  sendAt?: Date;
+  connectionId?: string;
+  peer: SimplePeerI;
+  send() {
+    this.sendAt = new Date();
+    this.peer.on("signal", (e) => {
+      //Make connection to peer
+      this.me.logTo(AvailableEvents.signal_to, this.userId);
+      this.me.socket.emit(SEND_DATA, {
+        event: AvailableEvents.signal_to,
+        fromUserId: this.me.user.id,
+        connection_Id: this.me.user.connectionId,
+        toUserId: this.userId,
+        payload: JSON.stringify(e),
+      });
+    });
+    this.peer.on("connect", (e) => {});
+    this.peer.on("error", (e) => {
+      this.me.logTo("ERROR:" + e, this.userId);
+    });
   }
 
   healthcheckintv: any;
   healthcheck() {
-    this.healthcheckintv = setInterval(() => {
-      this._log("HEALTH_CHECK");
-      _.each(this.users, (u, uid) => {
-        /*
-
-          Request retry connection ถ้าเกิดยังไม่ได้ stream จาก user คนนั้น
-
-        */
-        let lastActivity = u.createdAt;
-
-        let stream;
-        if (u.incoming) {
-          lastActivity = u.incoming.activityAt;
-          stream = u.incoming.stream;
-          u.incoming.activityAt = new Date();
-        }
-        const diffSec = Math.abs(
-          (lastActivity.getTime() - lastActivity.getTime()) / 1000
-        );
-        if (diffSec > 5 && !stream) {
-          this.logTo(AvailableEvents.need_retry, uid);
-          this.socket.emit(SEND_DATA, {
-            event: AvailableEvents.need_retry,
-            conenection_id: Math.random().toString(),
-            fromUserId: this.user.id,
-            toUserId: uid,
-          });
-        }
-      });
-    }, 3000);
+    this.healthcheckintv = setInterval(() => {}, 3000);
   }
 
-  constructor(c: PoodnaConstructor) {
-    this.get_users = c.get_users;
-    this.conenection_id = Math.random().toString();
-    this.users = {};
-    this.localStream = c.localStream;
-    this.user = c.user;
+  destroy() {
+    if (this.healthcheckintv) {
+      clearInterval(this.healthcheckintv);
+    }
+    this.me.socket.offAny(this.handleSocket.bind(this));
+    if (this.peer) {
+      this.peer.destroy();
+    }
+    delete this.me.outgoings[this.userId];
+  }
+}
 
+export class PoodnaPeer {
+  get_users: () => PoodnaPeerUser[];
+  localStream: MediaStream;
+  combinedStream?: MediaStream;
+  user: PoodnaPeerUser;
+  socket: Socket;
+  incomings: {
+    [userId: string]: IncomingHop;
+  } = {};
+  outgoings: {
+    [userId: string]: OutgoingHop;
+  } = {};
+  constructor(c: {
+    get_users: () => PoodnaPeerUser[];
+    localStream: MediaStream;
+    user: PoodnaPeerUser;
+    onConnect: () => void;
+  }) {
+    this.get_users = c.get_users;
+    this.user = c.user;
+    this.localStream = c.localStream;
     this.socket = io(`${API_BASE_URL}`, {
       query: {
         userId: this.user.id,
@@ -131,220 +198,134 @@ export class PoodnaPeer {
       c.onConnect();
       this.healthcheck();
     });
-    this.socket.onAny(async (e: AvailableEventsStr, data: SocketEventData) => {
-      if (!data.fromUserId) {
+    this.socket.onAny(this.handleSocket.bind(this));
+  }
+  async handleSocket(e: AvailableEventsStr, data: SocketEventData) {
+    if (!data.fromUserId) {
+      return;
+    }
+    switch (data.event) {
+      case AvailableEvents.request_sound: {
+        if (this.shouldGiveSound(data.fromUserId)) {
+          this.sendSound(data.fromUserId);
+        }
+        break;
+      }
+    }
+  }
+  requestSoundTo(toUserId: string) {
+    //1. Generate incoming Peer
+    this.incomings[toUserId] =
+      this.incomings[toUserId] ||
+      new IncomingHop({
+        me: this,
+        userId: toUserId,
+      });
+    //2. Call request function
+    this.incomings[toUserId].request();
+  }
+  sendSound(toUserId: string) {
+    //1. Generate Outgoing Peer
+    this.outgoings[toUserId] =
+      this.outgoings[toUserId] ||
+      new OutgoingHop({
+        me: this,
+        userId: toUserId,
+      });
+    //2. Call send function
+    this.outgoings[toUserId].send();
+  }
+  //Implement when add or remove user
+  users: PoodnaPeerUser[] = [];
+  onUserChanged() {
+    this._log("ON USER CHANGED");
+    const cus = this.get_users();
+    const newus: PoodnaPeerUser[] = [];
+    const rmus: PoodnaPeerUser[] = [];
+    //Remove Not found users and not matching role
+    this.users.forEach((u) => {
+      const foundU = cus.find(
+        (_u) =>
+          _u.connectionId === u.connectionId &&
+          u.id === _u.id &&
+          u.role === _u.role
+      );
+      if (!foundU) {
+        rmus.push(u);
         return;
       }
-
-      switch (data.event) {
-        case AvailableEvents.need_retry: {
-          this.logFrom(AvailableEvents.need_retry, data.fromUserId);
-          this.outgoingCall(data.fromUserId, Math.random().toString());
-          break;
-        }
-        case AvailableEvents.signal_to: {
-          this.logFrom(AvailableEvents.signal_to, data.fromUserId);
-          const h = this.fetchHop(data.fromUserId, data.conenection_id, false, {
-            onCreated: (peer) => {
-              peer.on("signal", (e) => {
-                this.logTo(AvailableEvents.signal_back, data.fromUserId);
-                this.socket.emit(SEND_DATA, {
-                  event: AvailableEvents.signal_back,
-                  conenection_id: data.conenection_id,
-                  fromUserId: this.user.id,
-                  toUserId: data.fromUserId,
-                  payload: JSON.stringify(e),
-                });
-              });
-              peer.on("connect", (e) => {});
-              peer.on("error", (e) => {
-                this.logFrom("ERROR:" + e, data.fromUserId);
-              });
-              peer.on("stream", (stream) => {
-                this.logFrom("GOT STREAM", data.fromUserId);
-                console.log(this.users, this.get_users());
-                if (!h.audioEl) {
-                  h.audioEl = document.createElement("audio");
-                  document
-                    .getElementsByTagName("body")[0]
-                    .appendChild(h.audioEl);
-                }
-
-                h.audioEl.setAttribute("autoplay", "true");
-                h.stream = stream;
-                h.audioEl.srcObject = stream;
-              });
-            },
-          });
-          h.peer.signal(data.payload);
-
-          break;
-        }
-        case AvailableEvents.signal_back: {
-          //Fetch outging hop
-          this.logFrom(AvailableEvents.signal_back, data.fromUserId);
-          const h = this.fetchHop(data.fromUserId, data.conenection_id, true, {
-            onCreated: () => {},
-          });
-          h.peer.signal(data.payload);
-          break;
-        }
+    });
+    //And add new user
+    cus.forEach((u) => {
+      const foundU = this.users.find(
+        (_u) =>
+          _u.connectionId === u.connectionId &&
+          u.id === _u.id &&
+          u.role === _u.role
+      );
+      if (!foundU) {
+        newus.push(u);
+        return;
       }
     });
-    this.socket.emit("");
+    rmus.forEach((u) => this.onUserRemove(u));
+    newus.forEach((u) => this.onNewUser(u));
+    this._log("ON USER CHANGED");
+    console.log("RM", rmus);
+    console.log("NEW", newus);
+    this.users = cus.slice(0);
   }
-  async onOffer(data: SocketEventData) {}
-  onNewUserInRoom(user: PoodnaPeerUser) {
-    this._log("NEW USER:" + JSON.stringify(user));
-    this.outgoingCall(user.id, Math.random().toString());
+  //Implement
+  onNewUser(u: PoodnaPeerUser) {
+    this.requestSoundTo(u.id);
   }
-  clearHop(userId: string) {
-    if (this.users[userId]?.outgoing) {
-      this.users[userId].outgoing?.peer.destroy();
-      if (this.users[userId].outgoing.audioEl) {
-        this.users[userId].outgoing.audioEl.remove();
-      }
-      delete this.users[userId].outgoing;
+  //Implement
+  onUserRemove(u: PoodnaPeerUser) {
+    if (this.outgoings[u.id]) {
+      this.outgoings[u.id].destroy();
     }
-    if (this.users[userId]?.incoming) {
-      this.users[userId].incoming?.peer.destroy();
-      if (this.users[userId].incoming.audioEl) {
-        this.users[userId].incoming.audioEl.remove();
-      }
-      delete this.users[userId].incoming;
+    if (this.incomings[u.id]) {
+      this.incomings[u.id].destroy();
     }
   }
-  mainloops() {
-    return this.get_users().filter((u) => u.role === "MAIN_LOOP");
-  }
-  broadcasters() {
-    return this.get_users().filter((u) => u.role === "BROADCASTER");
-  }
-  listeners() {
-    return this.get_users().filter((u) => u.role === "LISTENER");
-  }
-  fetchHop(
-    userId: string,
-    conenection_id: string,
-    outgoing: boolean,
-    cb: { onCreated?: (p: SimplePeerI) => void }
-  ) {
-    if (
-      outgoing &&
-      this.users[userId]?.outgoing &&
-      this.users[userId]?.outgoing.conenection_id !== conenection_id
-    ) {
-      this.users[userId].outgoing?.peer.destroy();
-      if (this.users[userId].outgoing.audioEl) {
-        this.users[userId].outgoing.audioEl.remove();
-      }
-      delete this.users[userId].outgoing;
-    }
-    if (
-      !outgoing &&
-      this.users[userId]?.incoming &&
-      this.users[userId]?.incoming.conenection_id !== conenection_id
-    ) {
-      this.users[userId].incoming?.peer.destroy();
-      if (this.users[userId].incoming.audioEl) {
-        this.users[userId].incoming.audioEl.remove();
-      }
-      delete this.users[userId].incoming;
-    }
-    let h = this.users[userId];
+  /*
 
-    if (!h) {
-      h = {
-        outgoing: null,
-        incoming: null,
-        createdAt: new Date(),
-      };
-      this.users[userId] = h;
-    }
-    const _onCreated = (p: SimplePeerI) => {
-      cb.onCreated?.(p);
-    };
-    if (outgoing && (!h.outgoing || h.outgoing.peer.destroyed)) {
-      const channel = Math.random().toString();
-      let op = new Peer({
-        channelName: channel,
-        initiator: true,
-        stream: this.localStream,
-      });
-      _onCreated(op);
-      h.outgoing = {
-        conenection_id,
-        peer: op,
-        channel,
-        userId,
-        activityAt: new Date(),
-      };
-    } else if (!outgoing && (!h.incoming || h.incoming.peer.destroyed)) {
-      const channel = Math.random().toString();
-      let op = new Peer({
-        channelName: channel,
-      });
-      _onCreated(op);
+    Determine if you want to give sound to user
 
-      h.incoming = {
-        conenection_id,
-        peer: op,
-        channel,
-        userId,
-        activityAt: new Date(),
-      };
-    }
-    if (outgoing) {
-      this.users[userId].outgoing.activityAt = new Date();
-      return this.users[userId].outgoing;
-    } else {
-      this.users[userId].outgoing.activityAt = new Date();
-      return this.users[userId].incoming;
-    }
+  */
+  shouldGiveSound(reqeusterId: string) {
+    let result = true;
+    this.logFrom(`ShouldGiveSound-${result}`, reqeusterId);
+    return result;
   }
-  outgoingCall(userId: string, connectionId: string) {
-    this.logTo("OUTGOING CALL", userId);
-    const h = this.fetchHop(userId, connectionId, true, {
-      onCreated: (peer) => {
-        peer.on("signal", (e) => {
-          //Make connection to peer
-          this.logTo(AvailableEvents.signal_to, userId);
-          this.socket.emit(SEND_DATA, {
-            event: AvailableEvents.signal_to,
-            fromUserId: this.user.id,
-            conenection_id: connectionId,
-            toUserId: userId,
-            payload: JSON.stringify(e),
-          });
-        });
-        peer.on("connect", (e) => {});
-        peer.on("error", (e) => {
-          this.logTo("ERROR:" + e, userId);
-        });
-      },
-    });
+  /*
+    Health check
+  */
+  healthcheckintv: any;
+  healthcheck() {
+    this.healthcheckintv = setInterval(() => {}, 3000);
   }
+  /*
+    Cleanup
+  */
   destroy() {
-    if (this.healthcheckintv) {
-      clearInterval(this.healthcheckintv);
-    }
-    _.each(this.users, (v) => {
-      v.incoming?.peer.destroy();
-      v.outgoing?.peer.destroy();
-      if (v.incoming?.audioEl) {
-        v.incoming?.audioEl.remove();
-      }
-      if (v.outgoing?.audioEl) {
-        v.outgoing?.audioEl.remove();
-      }
-    });
-    this.socket.disconnect();
-    this.socket.offAny();
+    this.socket.offAny(this.handleSocket.bind(this));
+    clearInterval(this.healthcheckintv);
+  }
+  /*
+    Logging
+  */
+  _log(m: string) {
+    console.log(`${new Date().getTime()}:${this.user.role}:${m}`);
+  }
+  logTo(m: string, toUserId: string) {
+    const u = this.get_users().find((u) => u.id === toUserId);
+    let username = u ? u?.name + "/" + u?.role : toUserId;
+    this._log(`TO:${username}:${m}`);
+  }
+  logFrom(m: string, toUserId: string) {
+    const u = this.get_users().find((u) => u.id === toUserId);
+    let username = u ? u?.name + "/" + u?.role : toUserId;
+    this._log(`FROM:${username}:${m}`);
   }
 }
-
-export class MainLoopPeer extends PoodnaPeer {}
-
-export class BroadCasterPeer extends PoodnaPeer {}
-
-export class ListenerPeer extends PoodnaPeer {}

@@ -1,13 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import api from "src/api";
-import {
-  BroadCasterPeer,
-  MainLoopPeer,
-  ListenerPeer,
-  PoodnaPeerUser,
-  PoodnaPeer,
-  PoodnaRole,
-} from "src/services/PoodnaPeer";
+import { PoodnaPeerUser, PoodnaPeer } from "src/services/PoodnaPeer";
 import { appStore } from "src/stores/appStore";
 import { useRoom } from "./RoomProvider";
 /*
@@ -15,7 +8,7 @@ import { useRoom } from "./RoomProvider";
 */
 const MyLogic = (p: {
   roomId: string;
-  role: PoodnaRole;
+  me: PoodnaPeerUser;
   users: PoodnaPeerUser[];
 }) => {
   const users = useRef<PoodnaPeerUser[]>([]);
@@ -23,17 +16,8 @@ const MyLogic = (p: {
   const [ready, setReady] = useState(false);
   useEffect(() => {
     if (pp.current && ready) {
-      p.users
-        .filter((u) => {
-          return (
-            !users.current.find((_u) => _u.connectionId === u.connectionId) &&
-            u.id !== appStore.user.id
-          );
-        })
-        .forEach((newU) => {
-          pp.current.onNewUserInRoom(newU);
-        });
       users.current = p.users;
+      pp.current.onUserChanged();
     }
   }, [
     ready,
@@ -41,18 +25,12 @@ const MyLogic = (p: {
   ]);
 
   useEffect(() => {
-    const get_users = () => {
-      return users.current;
-    };
-    const userId = appStore.user.id;
-    const localStream = appStore.app.localStream;
-    const x = {
-      get_users,
-      localStream,
-      user: {
-        id: userId,
-        role: p.role,
+    pp.current = new PoodnaPeer({
+      get_users: () => {
+        return users.current;
       },
+      localStream: appStore.app.localStream,
+      user: p.me,
       onConnect: () => {
         const connectionId = Math.random().toString();
         api.ChatRoom.add_connection
@@ -65,24 +43,9 @@ const MyLogic = (p: {
             setReady(true);
           });
       },
-    };
-
-    let peer =
-      p.role === "MAIN_LOOP"
-        ? new MainLoopPeer(x)
-        : p.role === "BROADCASTER"
-        ? new BroadCasterPeer(x)
-        : p.role === "LISTENER"
-        ? new ListenerPeer(x)
-        : false;
-    if (peer !== false) {
-      pp.current = peer;
-    }
-
+    });
     return () => {
-      if (peer !== true && peer !== false) {
-        peer.destroy();
-      }
+      pp.current.destroy();
     };
   }, []);
   return <></>;
@@ -90,45 +53,37 @@ const MyLogic = (p: {
 export default () => {
   const r = useRoom();
 
-  const [myRole, setMyRole] = useState<PoodnaRole>("UNKNOWN");
-  const mainLoops: PoodnaPeerUser[] = (r.mainloop?.list || []).map((v) => ({
-    id: v.id,
-    name: v.name,
-    avatar: v.avatar,
-    connectionId:
-      (r.connections?.list || []).find((d) => d.userId === v.id)
-        ?.connectionId || "NONE",
-    role: "MAIN_LOOP",
-  }));
-  const broadcasters: PoodnaPeerUser[] = (r.broadcasters?.list || []).map(
-    (v) => ({
-      id: v.id,
-      name: v.name,
-      avatar: v.avatar,
-      connectionId:
-        (r.connections?.list || []).find((d) => d.userId === v.id)
-          ?.connectionId || "NONE",
-      role: "BROADCASTER",
-    })
-  );
-  const listeners: PoodnaPeerUser[] = (r.outsider?.list || []).map((v) => ({
-    id: v.id,
-    name: v.name,
-    avatar: v.avatar,
-    connectionId:
-      (r.connections?.list || []).find((d) => d.userId === v.id)
-        ?.connectionId || "NONE",
-    role: "LISTENER",
-  }));
-  const users: PoodnaPeerUser[] = _.uniqBy(
-    [].concat(broadcasters).concat(mainLoops).concat(listeners),
-    "id"
-  );
+  const [myRole, setMyRole] = useState<string>("UNKNOWN");
 
+  const users: PoodnaPeerUser[] = _.uniqBy(
+    (r.mainloop?.list || [])
+      .concat(r.broadcasters?.list || [])
+      .concat(r.outsider?.list || []),
+    "id"
+  ).map((u) => {
+    const isSpeaker =
+      (r.mainloop?.list || []).map((d) => d.id).indexOf(u.id) >= 0;
+    const isBroadCaster =
+      (r.broadcasters?.list || []).map((d) => d.id).indexOf(u.id) >= 0;
+    return {
+      id: u.id,
+      name: u.name,
+      avatar: u.avatar,
+      connectionId:
+        (r.connections?.list || []).find((d) => d.userId === u.id)
+          ?.connectionId || "NONE",
+      speaker: isSpeaker,
+      broadcaster: isBroadCaster,
+      role: `${isSpeaker ? "SPEAKER" : "LISTENER"}${
+        isBroadCaster ? "+BROADCASTER" : ""
+      }`,
+    };
+  });
+  const me = users.find((u) => u.id === appStore.user.id && u.connectionId);
   useEffect(() => {
-    const role = users.find((u) => u.id === appStore.user.id)?.role;
-    if (role) {
-      setMyRole(role);
+    const r = users.find((u) => u.id === appStore.user.id)?.role;
+    if (r) {
+      setMyRole(r);
     }
   }, [users.map((u) => u.id + "_" + u.role).join("_")]);
 
@@ -138,10 +93,10 @@ export default () => {
         {myRole !== "UNKNOWN" && r.room?.item && (
           <MyLogic
             roomId={r.room.item.id}
+            me={me}
             users={users.filter(
               (u) => u.id !== appStore.user.id && u.connectionId
             )}
-            role={myRole}
           />
         )}
       </div>

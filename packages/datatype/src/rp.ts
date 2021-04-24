@@ -1,5 +1,6 @@
 export const SEND_DATA = "send-data";
 export enum AvailableEvents {
+  request_sound = "request_sound",
   need_retry = "need_retry",
   signal_to_force = "signal_to_force",
   signal_to = "signal_to",
