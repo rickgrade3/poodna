@@ -29,8 +29,14 @@ export class IncomingHop {
   me: PoodnaPeer;
   userId: string;
   connectionId?: string;
-  constructor(c: { me: PoodnaPeer; userId: string }) {
+  onGetStream: (s: MediaStream) => void;
+  constructor(c: {
+    me: PoodnaPeer;
+    userId: string;
+    onGetStream: (s: MediaStream) => void;
+  }) {
     this.me = c.me;
+    this.onGetStream = c.onGetStream;
     this.userId = c.userId;
 
     this.me.socket.onAny(this.handleSocket.bind(this));
@@ -60,6 +66,7 @@ export class IncomingHop {
         this.fetchPeer(data.connection_id, (peer) => {
           console.log("ON CREATED");
           peer.on("signal", (e) => {
+            this.requestAt = new Date();
             this.me.logTo(AvailableEvents.signal_back, data.fromUserId);
             this.me.socket.emit(SEND_DATA, {
               event: AvailableEvents.signal_back,
@@ -69,12 +76,19 @@ export class IncomingHop {
               payload: JSON.stringify(e),
             });
           });
-          peer.on("connect", (e) => {});
+          peer.on("connect", (e) => {
+            this.requestAt = new Date();
+          });
           peer.on("error", (e) => {
             this.me.logFrom("ERROR:" + e, data.fromUserId);
           });
-          peer.on("stream", (stream) => {
-            console.log(this.me.incomings, this.me.get_users());
+          peer.on("stream", (stream: any) => {
+            this.requestAt = new Date();
+            console.log(
+              this.me.incomings,
+              this.me.get_users(),
+              stream.getTracks()
+            );
             this.me.logFrom("GOT STREAM", data.fromUserId);
             if (this.audioEl) {
               this.audioEl.remove();
@@ -84,6 +98,7 @@ export class IncomingHop {
             this.audioEl.setAttribute("autoplay", "true");
             this.stream = stream;
             this.audioEl.srcObject = stream;
+            this.onGetStream(stream);
           });
           console.log("SIGNALLL");
           peer.signal(data.payload);
@@ -129,7 +144,7 @@ export class IncomingHop {
           this.request();
         }
       }
-    }, 10000);
+    }, 5000);
   }
   destroyed: boolean = false;
   destroy() {
@@ -147,6 +162,7 @@ export class IncomingHop {
 //Give the sound to the others
 export class OutgoingHop {
   me: PoodnaPeer;
+  stream: MediaStream;
   userId: string;
   connectionId?: string;
   fetchPeer(cid: string, onCreated: (peer: SimplePeerI) => void) {
@@ -159,15 +175,16 @@ export class OutgoingHop {
       this.peer = new Peer({
         channelName: Math.random().toString(),
         initiator: true,
-        stream: this.me.localStream,
+        stream: this.stream,
       });
       onCreated(this.peer);
     } else {
       return this.peer;
     }
   }
-  constructor(c: { me: PoodnaPeer; userId: string }) {
+  constructor(c: { me: PoodnaPeer; userId: string; stream: MediaStream }) {
     this.me = c.me;
+    this.stream = c.stream;
     this.userId = c.userId;
     console.log("CREATE OUTGOING", this.userId, this.me.user.id);
     this.me.socket.onAny(this.handleSocket.bind(this));
@@ -236,7 +253,7 @@ export class OutgoingHop {
 export class PoodnaPeer {
   get_users: () => PoodnaPeerUser[];
   localStream: MediaStream;
-  combinedStream?: MediaStream;
+  combinedStream: MediaStream = new MediaStream();
   user: PoodnaPeerUser;
   socket: Socket;
   incomings: {
@@ -254,6 +271,9 @@ export class PoodnaPeer {
     this.get_users = c.get_users;
     this.user = c.user;
     this.localStream = c.localStream;
+    this.localStream.getTracks().forEach((t) => {
+      this.combinedStream.addTrack(t);
+    });
     this.socket = io(`${API_BASE_URL}`, {
       query: {
         userId: this.user.id,
@@ -274,11 +294,12 @@ export class PoodnaPeer {
     }
     switch (data.event) {
       case AvailableEvents.request_sound: {
-        if (this.shouldGiveSound(data.fromUserId)) {
+        const stream = this.getStreamForUser(data.fromUserId);
+        if (stream) {
           if (this.outgoings[data.fromUserId]) {
             this.outgoings[data.fromUserId].destroy();
           }
-          this.sendSound(data.fromUserId);
+          this.sendSound(data.fromUserId, stream);
         }
         break;
       }
@@ -294,20 +315,35 @@ export class PoodnaPeer {
       new IncomingHop({
         me: this,
         userId: toUserId,
+        onGetStream: this.combineSound.bind(this),
       });
     //2. Call request function
     this.incomings[toUserId].request();
   }
-  sendSound(toUserId: string) {
+
+  sendSound(toUserId: string, stream: MediaStream) {
     //1. Generate Outgoing Peer
     this.outgoings[toUserId] =
       this.outgoings[toUserId] ||
       new OutgoingHop({
         me: this,
+        stream,
         userId: toUserId,
       });
     //2. Call send function
     this.outgoings[toUserId].send();
+  }
+  combineSound(s: MediaStream) {
+    s.getTracks().forEach((t) => {
+      this.combinedStream.addTrack(t);
+    });
+    _.each(this.outgoings, (o) => {
+      if (o.stream === this.combinedStream) {
+        try {
+          o.peer.addStream(this.combinedStream);
+        } catch (error) {}
+      }
+    });
   }
   //Implement when add or remove user
   users: PoodnaPeerUser[] = [];
@@ -382,32 +418,36 @@ export class PoodnaPeer {
       this.incomings[u.id].destroy();
     }
   }
+
   /*
 
     Determine if you want to give sound to user
 
   */
-  shouldGiveSound(reqeusterId: string) {
+  getStreamForUser(reqeusterId: string) {
     let requestUser = this.get_users().find((u) => u.id === reqeusterId);
 
-    let shouldGive = false;
+    let streamToGive: MediaStream | false = false;
     const self = this.user;
     switch (true) {
       case self.broadcaster && self.speaker: //SPEAKER + BC
-        shouldGive = true;
+        streamToGive = requestUser?.speaker
+          ? this.localStream
+          : this.combinedStream;
         break;
       case !self.broadcaster && self.speaker: //SPEAKER
-        shouldGive = requestUser?.speaker;
+        streamToGive = requestUser?.speaker ? this.localStream : false;
         break;
       case self.broadcaster && !self.speaker: //LISTENER + BC
-        shouldGive = false;
+        streamToGive = false;
         break;
       case !self.broadcaster && !self.speaker: //LISTENER
-        shouldGive = false;
+        streamToGive = false;
         break;
     }
-    this.logFrom(`ShouldGiveSound-${shouldGive}`, reqeusterId);
-    return shouldGive;
+
+    this.logFrom(`ShouldGiveSound-${!!streamToGive}`, reqeusterId);
+    return streamToGive;
   }
   /*
     Health check
