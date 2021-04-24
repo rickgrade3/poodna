@@ -35,6 +35,7 @@ export class IncomingHop {
       stream: this.me.localStream,
     });
     this.me.socket.onAny(this.handleSocket.bind(this));
+    this.healthcheck();
   }
   async handleSocket(e: AvailableEventsStr, data: SocketEventData) {
     if (data.fromUserId !== this.userId) {
@@ -78,6 +79,9 @@ export class IncomingHop {
     }
   }
   request() {
+    if (this.requestAt) {
+      return;
+    }
     this.requestAt = new Date();
     this.me.logTo(AvailableEvents.request_sound, this.me.user.id);
     this.me.socket.emit(SEND_DATA, {
@@ -92,14 +96,33 @@ export class IncomingHop {
   peer?: SimplePeerI;
   stream?: MediaStream;
   audioEl?: HTMLAudioElement;
+
+  healthcheckintv: any;
+  healthcheck() {
+    this.healthcheckintv = setInterval(() => {
+      if (this.requestAt) {
+        const diffSec = Math.abs(
+          (this.requestAt.getTime() - new Date().getTime()) / 1000
+        );
+        if (!this.stream)
+          this.me.logFrom(`<<HEALTH_CHECK>>${diffSec}s`, this.userId);
+        if (diffSec > 10 && !this.stream) {
+          delete this.requestAt;
+          this.request();
+        }
+      }
+    }, 5000);
+  }
   destroy() {
+    if (this.healthcheckintv) clearInterval(this.healthcheckintv);
     this.me.socket.offAny(this.handleSocket.bind(this));
     if (this.peer) {
       this.peer.destroy();
     }
+    if (this.audioEl) this.audioEl.remove();
+
     delete this.me.incomings[this.userId];
   }
-  healthcheck() {}
 }
 //Give the sound to the others
 export class OutgoingHop {
@@ -207,6 +230,9 @@ export class PoodnaPeer {
     switch (data.event) {
       case AvailableEvents.request_sound: {
         if (this.shouldGiveSound(data.fromUserId)) {
+          if (this.outgoings[data.fromUserId]) {
+            this.outgoings[data.fromUserId].destroy();
+          }
           this.sendSound(data.fromUserId);
         }
         break;
