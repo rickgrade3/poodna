@@ -162,6 +162,7 @@ export class PoodnaPeer {
               });
               peer.on("stream", (stream) => {
                 this.logFrom("GOT STREAM", data.fromUserId);
+                console.log(this.users, this.get_users());
                 if (!h.audioEl) {
                   h.audioEl = document.createElement("audio");
                   document
