@@ -92,7 +92,7 @@ export class IncomingHop {
       payload: "",
     });
   }
-  requestAt?: Date;
+  requestAt?: Date | null;
   peer?: SimplePeerI;
   stream?: MediaStream;
   audioEl?: HTMLAudioElement;
@@ -107,7 +107,7 @@ export class IncomingHop {
         if (!this.stream)
           this.me.logFrom(`<<HEALTH_CHECK>>${diffSec}s`, this.userId);
         if (diffSec > 10 && !this.stream) {
-          delete this.requestAt;
+          this.requestAt = null;
           this.request();
         }
       }
@@ -302,8 +302,28 @@ export class PoodnaPeer {
     this.users = cus.slice(0);
   }
   //Implement
-  onNewUser(u: PoodnaPeerUser) {
-    this.requestSoundTo(u.id);
+  onNewUser(newUser: PoodnaPeerUser) {
+    let shouldReqsound = false;
+    const self = this.user;
+    switch (true) {
+      case self.broadcaster && self.speaker: //SPEAKER + BC
+        shouldReqsound = newUser.speaker;
+
+        break;
+      case !self.broadcaster && self.speaker: //SPEAKER
+        shouldReqsound = newUser.speaker;
+
+        break;
+      case self.broadcaster && !self.speaker: //LISTENER + BC
+        shouldReqsound = newUser.speaker && newUser.broadcaster;
+        break;
+      case !self.broadcaster && !self.speaker: //LISTENER
+        shouldReqsound = newUser.speaker && newUser.broadcaster;
+        break;
+    }
+    if (shouldReqsound) {
+      this.requestSoundTo(newUser.id);
+    }
   }
   //Implement
   onUserRemove(u: PoodnaPeerUser) {
@@ -320,9 +340,26 @@ export class PoodnaPeer {
 
   */
   shouldGiveSound(reqeusterId: string) {
-    let result = true;
-    this.logFrom(`ShouldGiveSound-${result}`, reqeusterId);
-    return result;
+    let requestUser = this.get_users().find((u) => u.id === reqeusterId);
+
+    let shouldGive = false;
+    const self = this.user;
+    switch (true) {
+      case self.broadcaster && self.speaker: //SPEAKER + BC
+        shouldGive = true;
+        break;
+      case !self.broadcaster && self.speaker: //SPEAKER
+        shouldGive = requestUser?.speaker;
+        break;
+      case self.broadcaster && !self.speaker: //LISTENER + BC
+        shouldGive = false;
+        break;
+      case !self.broadcaster && !self.speaker: //LISTENER
+        shouldGive = false;
+        break;
+    }
+    this.logFrom(`ShouldGiveSound-${shouldGive}`, reqeusterId);
+    return shouldGive;
   }
   /*
     Health check
