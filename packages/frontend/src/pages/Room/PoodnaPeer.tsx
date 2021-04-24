@@ -22,7 +22,6 @@ const MyLogic = (p: {
   const pp = useRef<PoodnaPeer>();
   const [ready, setReady] = useState(false);
   useEffect(() => {
-    console.log(pp.current, ready);
     if (pp.current && ready) {
       p.users
         .filter((u) => {
@@ -32,7 +31,6 @@ const MyLogic = (p: {
           );
         })
         .forEach((newU) => {
-          console.log("new User");
           pp.current.onNewUserInRoom(newU);
         });
       users.current = p.users;
@@ -41,7 +39,7 @@ const MyLogic = (p: {
     ready,
     p.users.map((u) => u.connectionId + "_" + u.id + "_" + u.role).join("_"),
   ]);
-  console.log(p.users);
+
   useEffect(() => {
     const get_users = () => {
       return users.current;
@@ -56,7 +54,6 @@ const MyLogic = (p: {
         role: p.role,
       },
       onConnect: () => {
-        console.log("Connect Socket IO");
         api.ChatRoom.add_connection
           .execute({
             id: p.roomId,
@@ -68,7 +65,7 @@ const MyLogic = (p: {
           });
       },
     };
-    console.log("p.role", p.role);
+
     let peer =
       p.role === "MAIN_LOOP"
         ? new MainLoopPeer(x)
@@ -92,10 +89,12 @@ const MyLogic = (p: {
 };
 export default () => {
   const r = useRoom();
-  console.log(r.connections);
+
   const [myRole, setMyRole] = useState<PoodnaRole>("UNKNOWN");
   const mainLoops: PoodnaPeerUser[] = (r.mainloop?.list || []).map((v) => ({
     id: v.id,
+    name: v.name,
+    avatar: v.avatar,
     connectionId: (r.connections?.list || []).find((d) => d.userId === v.id)
       ?.connectionId,
     role: "MAIN_LOOP",
@@ -103,6 +102,8 @@ export default () => {
   const broadcasters: PoodnaPeerUser[] = (r.broadcasters?.list || []).map(
     (v) => ({
       id: v.id,
+      name: v.name,
+      avatar: v.avatar,
       connectionId: (r.connections?.list || []).find((d) => d.userId === v.id)
         ?.connectionId,
       role: "BROADCASTER",
@@ -110,6 +111,8 @@ export default () => {
   );
   const listeners: PoodnaPeerUser[] = (r.outsider?.list || []).map((v) => ({
     id: v.id,
+    name: v.name,
+    avatar: v.avatar,
     connectionId: (r.connections?.list || []).find((d) => d.userId === v.id)
       ?.connectionId,
     role: "LISTENER",
@@ -125,7 +128,7 @@ export default () => {
       setMyRole(role);
     }
   }, [users.map((u) => u.id + "_" + u.role).join("_")]);
-  console.log("users", users);
+
   return (
     <>
       <div key={myRole}>

@@ -77,7 +77,6 @@ export default {
         .put(gun.get("users").get(p.userId) as any);
     },
     value: (res, gun, prev) => {
-      console.log("res", res);
       return {
         list: _.uniqBy([...(prev?.list || []), res], "id"),
       };
@@ -98,7 +97,6 @@ export default {
         .back();
     },
     value: (res, gun, prev) => {
-      console.log("del", res);
       return {
         list: _.uniqBy([...(prev?.list || []), res], "id"),
       };
@@ -138,7 +136,6 @@ export default {
         .back();
     },
     value: (res, gun, prev) => {
-      console.log("del", res);
       return {
         list: _.uniqBy([...(prev?.list || []), res], "id"),
       };
@@ -197,7 +194,6 @@ export default {
       return gun.get("rooms").get(p.id).get("broadcasters").map();
     },
     value: (res, gun, prev, req, key) => {
-      console.log("resres", res);
       if (!res && key) {
         return {
           list: (prev?.list || []).filter((d) => d.id !== key),

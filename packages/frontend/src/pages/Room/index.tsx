@@ -54,7 +54,6 @@ const Users = () => {
       {Array(r.room.item.maximum)
         .fill(0)
         .map((d, i) => {
-          console.log("x");
           const isBroadCaster = (r.broadcasters?.list || []).find(
             (_d) =>
               r.mainloop?.list?.[i] &&
@@ -138,7 +137,6 @@ const Inner = () => {
   const r = useRoom();
   useEffect(() => {
     if (r.room?.item?.id && r.room?.item?.ownerId !== appStore.user.id) {
-      console.log("Add outsider");
       api.ChatRoom.add_outsider.execute({
         id: r.room?.item.id || "",
         userId: appStore.user.id,

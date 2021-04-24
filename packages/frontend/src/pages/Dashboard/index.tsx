@@ -7,7 +7,7 @@ export default () => {
   const { data } = api.ChatRoom.list_by_user.hook({
     id: appStore.user.id,
   });
-  console.log(data);
+
   return (
     <Y gap={4}>
       <Y gap={10} variant={["box", "light", "rounded", "shadow"]}>

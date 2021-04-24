@@ -13,6 +13,8 @@ export type PoodnaRole = "BROADCASTER" | "LISTENER" | "MAIN_LOOP" | "UNKNOWN";
 
 export interface PoodnaPeerUser {
   id: string;
+  name?: string;
+  avatar?: string;
   connectionId?: string;
   role: PoodnaRole;
 }
@@ -61,6 +63,25 @@ export class PoodnaPeer {
   socket: Socket;
   conenection_id: string;
 
+  _log(m: string) {
+    console.log(`${new Date().getTime()}:${this.user.role}:${m}`);
+  }
+  logTo(m: string, toUserId: string) {
+    let username =
+      toUserId +
+      ":" +
+      (this.get_users().find((u) => u.id === toUserId)?.name || "-");
+
+    this._log(`TO:${username}:${m}`);
+  }
+  logFrom(m: string, toUserId: string) {
+    let username =
+      toUserId +
+      ":" +
+      (this.get_users().find((u) => u.id === toUserId)?.name || "-");
+    this._log(`FROM:${username}:${m}`);
+  }
+
   constructor(c: PoodnaConstructor) {
     this.get_users = c.get_users;
     this.conenection_id = Math.random().toString();
@@ -73,24 +94,29 @@ export class PoodnaPeer {
         userId: this.user.id,
       },
     });
-    this.socket.on("connect", c.onConnect);
+    this.socket.on("connect", () => {
+      this._log(">>Socket IO Connected<<");
+      this._log(`me: ${this.user.id}`);
+      this._log(`role: ${this.user.role}`);
+      c.onConnect();
+    });
     this.socket.onAny(async (e: AvailableEventsStr, data: SocketEventData) => {
       if (!data.fromUserId) {
         return;
       }
-      console.log("<<SOCKET>>", data.event, data);
+
       switch (data.event) {
         case AvailableEvents.need_retry: {
-          console.log("RETRY CONNECTION");
+          this.logFrom(AvailableEvents.need_retry, data.fromUserId);
           this.outgoingCall(data.fromUserId, Math.random().toString());
           break;
         }
         case AvailableEvents.signal_to: {
+          this.logFrom(AvailableEvents.signal_to, data.fromUserId);
           const h = this.fetchHop(data.fromUserId, data.conenection_id, false, {
             onCreated: (peer) => {
-              console.log("BINDSIGNAL");
               peer.on("signal", (e) => {
-                console.log("EMIT SIGNAL IN");
+                this.logTo(AvailableEvents.signal_back, data.fromUserId);
                 this.socket.emit(SEND_DATA, {
                   event: AvailableEvents.signal_back,
                   conenection_id: data.conenection_id,
@@ -99,16 +125,9 @@ export class PoodnaPeer {
                   payload: JSON.stringify(e),
                 });
               });
-              peer.on("connect", (e) => {
-                console.log(
-                  "<<CONNECT>>",
-                  data.fromUserId,
-                  this.users[data.fromUserId]
-                );
-              });
+              peer.on("connect", (e) => {});
               peer.on("error", (e) => {
-                console.log("<<ERROR>>", e, data.fromUserId);
-                console.log("RETRY REQUEST");
+                this.logTo(AvailableEvents.need_retry, data.fromUserId);
                 this.socket.emit(SEND_DATA, {
                   event: AvailableEvents.need_retry,
                   conenection_id: data.conenection_id,
@@ -117,7 +136,7 @@ export class PoodnaPeer {
                 });
               });
               peer.on("stream", (stream) => {
-                console.log("<<STREAM>>", stream, data.fromUserId);
+                this.logFrom("GOT STREAM", data.fromUserId);
                 if (!h.audioEl) {
                   h.audioEl = document.createElement("audio");
                   document
@@ -137,10 +156,9 @@ export class PoodnaPeer {
         }
         case AvailableEvents.signal_back: {
           //Fetch outging hop
+          this.logFrom(AvailableEvents.signal_back, data.fromUserId);
           const h = this.fetchHop(data.fromUserId, data.conenection_id, true, {
-            onCreated: () => {
-              console.log("MUST NOT HAPPEN");
-            },
+            onCreated: () => {},
           });
           h.peer.signal(data.payload);
           break;
@@ -160,7 +178,6 @@ export class PoodnaPeer {
         this.users[userId].outgoing.audioEl.remove();
       }
       delete this.users[userId].outgoing;
-      console.log("CLEAR HOP OUTGOING");
     }
     if (this.users[userId]?.incoming) {
       this.users[userId].incoming?.peer.destroy();
@@ -168,7 +185,6 @@ export class PoodnaPeer {
         this.users[userId].incoming.audioEl.remove();
       }
       delete this.users[userId].incoming;
-      console.log("CLEAR HOP INCOMING");
     }
   }
   mainloops() {
@@ -196,7 +212,6 @@ export class PoodnaPeer {
         this.users[userId].outgoing.audioEl.remove();
       }
       delete this.users[userId].outgoing;
-      console.log("CLEAR OUTGOING");
     }
     if (
       !outgoing &&
@@ -208,7 +223,6 @@ export class PoodnaPeer {
         this.users[userId].incoming.audioEl.remove();
       }
       delete this.users[userId].incoming;
-      console.log("CLEAR INCOMING");
     }
     let h = this.users[userId];
 
@@ -257,12 +271,12 @@ export class PoodnaPeer {
     }
   }
   outgoingCall(userId: string, connectionId: string) {
+    this.logTo("OUTGOING CALL", userId);
     const h = this.fetchHop(userId, connectionId, true, {
       onCreated: (peer) => {
-        console.log("BINDSIGNAL");
         peer.on("signal", (e) => {
           //Make connection to peer
-          console.log("EMIT SIGNAL OUT");
+          this.logTo(AvailableEvents.signal_to, userId);
           this.socket.emit(SEND_DATA, {
             event: AvailableEvents.signal_to,
             fromUserId: this.user.id,
@@ -271,12 +285,8 @@ export class PoodnaPeer {
             payload: JSON.stringify(e),
           });
         });
-        peer.on("connect", (e) => {
-          console.log("<<CONNECT>>", userId, this.users[userId]);
-        });
-        peer.on("error", (e) => {
-          console.log("<<ERROR>>", e, userId);
-        });
+        peer.on("connect", (e) => {});
+        peer.on("error", (e) => {});
       },
     });
   }

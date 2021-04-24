@@ -46,7 +46,6 @@ export const GUNApiGen = function <
       setLoading(true);
 
       o.exec(p, gunStore.gun).on((v, key) => {
-        console.log("GUN ON", v, key);
         let newV = o.value(v, gunStore.gun, vv.current, p, key);
         vv.current = newV;
         setData(newV);
