@@ -163,6 +163,7 @@ export class PoodnaPeer {
   }
   async onOffer(data: SocketEventData) {}
   onNewUserInRoom(user: PoodnaPeerUser) {
+    this._log("NEW USER:" + JSON.stringify(user));
     this.outgoingCall(user.id, Math.random().toString());
   }
   clearHop(userId: string) {
