@@ -55,6 +55,18 @@ const MyLogic = (p: {
         id: userId,
         role: p.role,
       },
+      onConnect: () => {
+        console.log("Connect Socket IO");
+        api.ChatRoom.add_connection
+          .execute({
+            id: p.roomId,
+            userId: appStore.user.id,
+            connectionId,
+          })
+          .then(() => {
+            setReady(true);
+          });
+      },
     };
     console.log("p.role", p.role);
     let peer =
@@ -69,16 +81,6 @@ const MyLogic = (p: {
       pp.current = peer;
     }
     const connectionId = Math.random().toString();
-
-    api.ChatRoom.add_connection
-      .execute({
-        id: p.roomId,
-        userId: appStore.user.id,
-        connectionId,
-      })
-      .then(() => {
-        setReady(true);
-      });
 
     return () => {
       if (peer !== true && peer !== false) {

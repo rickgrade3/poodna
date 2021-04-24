@@ -29,6 +29,7 @@ export interface PoodnaConstructor {
   get_users: () => PoodnaPeerUser[];
   localStream: MediaStream;
   user: PoodnaPeerUser;
+  onConnect: () => any;
 }
 type Hop =
   | {
@@ -72,6 +73,7 @@ export class PoodnaPeer {
         userId: this.user.id,
       },
     });
+    this.socket.on("connect", c.onConnect);
     this.socket.onAny(async (e: AvailableEventsStr, data: SocketEventData) => {
       if (!data.fromUserId) {
         return;
