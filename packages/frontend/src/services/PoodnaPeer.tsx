@@ -18,7 +18,7 @@ export interface PoodnaPeerUser {
 }
 export type SocketEventData = {
   toUserId: string;
-  conenection_id: string;
+  connection_id: string;
   fromUserId: string;
   event: AvailableEventsStr;
   payload: any;
@@ -28,14 +28,27 @@ export type SocketEventData = {
 export class IncomingHop {
   me: PoodnaPeer;
   userId: string;
+  connectionId?: string;
   constructor(c: { me: PoodnaPeer; userId: string }) {
     this.me = c.me;
     this.userId = c.userId;
-    this.peer = new Peer({
-      stream: this.me.localStream,
-    });
+
     this.me.socket.onAny(this.handleSocket.bind(this));
     this.healthcheck();
+    console.log("CREATE INCOMING", this.userId, this.me.user.id);
+  }
+  fetchPeer(cid: string, onCreated: (peer: SimplePeerI) => void) {
+    if (this.destroyed) {
+      throw "Peer has been destroyed";
+    }
+    console.log("connectionId", cid);
+    if (cid !== this.connectionId) {
+      this.connectionId = cid;
+      this.peer = new Peer({
+        channelName: Math.random().toString(),
+      });
+      onCreated(this.peer);
+    }
   }
   async handleSocket(e: AvailableEventsStr, data: SocketEventData) {
     if (data.fromUserId !== this.userId) {
@@ -44,39 +57,37 @@ export class IncomingHop {
     switch (data.event) {
       case AvailableEvents.signal_to: {
         this.me.logFrom(AvailableEvents.signal_to, data.fromUserId);
-
-        this.peer.on("signal", (e) => {
-          this.me.logTo(AvailableEvents.signal_back, data.fromUserId);
-          this.me.socket.emit(SEND_DATA, {
-            event: AvailableEvents.signal_back,
-            fromUserId: this.me.user.id,
-            connection_Id: this.me.user.connectionId,
-            toUserId: data.fromUserId,
-            payload: JSON.stringify(e),
+        this.fetchPeer(data.connection_id, (peer) => {
+          console.log("ON CREATED");
+          peer.on("signal", (e) => {
+            this.me.logTo(AvailableEvents.signal_back, data.fromUserId);
+            this.me.socket.emit(SEND_DATA, {
+              event: AvailableEvents.signal_back,
+              fromUserId: this.me.user.id,
+              connection_id: data.fromUserId,
+              toUserId: data.fromUserId,
+              payload: JSON.stringify(e),
+            });
           });
-        });
-        this.peer.on("connect", (e) => {
-          this.me.logFrom("SOUND SENDED", data.fromUserId);
-        });
-        this.peer.on("error", (e) => {
-          this.me.logFrom("ERROR:" + e, data.fromUserId);
-        });
-        this.peer.on("stream", (stream) => {
-          this.me.logFrom("GOT STREAM", data.fromUserId);
-          console.log(this.me.incomings, this.me.get_users());
-          if (this.audioEl) {
-            this.audioEl.remove();
-            this.audioEl = null;
-          }
-          if (!this.audioEl) {
+          peer.on("connect", (e) => {});
+          peer.on("error", (e) => {
+            this.me.logFrom("ERROR:" + e, data.fromUserId);
+          });
+          peer.on("stream", (stream) => {
+            console.log(this.me.incomings, this.me.get_users());
+            this.me.logFrom("GOT STREAM", data.fromUserId);
+            if (this.audioEl) {
+              this.audioEl.remove();
+            }
             this.audioEl = document.createElement("audio");
             document.getElementsByTagName("body")[0].appendChild(this.audioEl);
-          }
-          this.audioEl.setAttribute("autoplay", "true");
-          this.stream = stream;
-          this.audioEl.srcObject = stream;
+            this.audioEl.setAttribute("autoplay", "true");
+            this.stream = stream;
+            this.audioEl.srcObject = stream;
+          });
+          console.log("SIGNALLL");
+          peer.signal(data.payload);
         });
-        if (!this.peer.destroyed) this.peer.signal(data.payload);
 
         break;
       }
@@ -91,7 +102,7 @@ export class IncomingHop {
     this.me.socket.emit(SEND_DATA, {
       event: AvailableEvents.request_sound,
       fromUserId: this.me.user.id,
-      connection_Id: this.me.user.connectionId,
+      connection_id: this.me.user.connectionId,
       toUserId: this.userId,
       payload: "",
     });
@@ -103,21 +114,26 @@ export class IncomingHop {
 
   healthcheckintv: any;
   healthcheck() {
+    console.log("healthcheck", this.userId);
     this.healthcheckintv = setInterval(() => {
       if (this.requestAt) {
         const diffSec = Math.abs(
           (this.requestAt.getTime() - new Date().getTime()) / 1000
         );
-        if (!this.stream)
+        if (!this.stream?.active) {
           this.me.logFrom(`<<HEALTH_CHECK>>${diffSec}s`, this.userId);
-        if (diffSec > 10 && !this.stream) {
+        }
+
+        if (diffSec > 10 && !this.stream?.active) {
           this.requestAt = null;
           this.request();
         }
       }
-    }, 5000);
+    }, 10000);
   }
+  destroyed: boolean = false;
   destroy() {
+    this.destroyed = true;
     if (this.healthcheckintv) clearInterval(this.healthcheckintv);
     this.me.socket.offAny(this.handleSocket.bind(this));
     if (this.peer) {
@@ -132,13 +148,28 @@ export class IncomingHop {
 export class OutgoingHop {
   me: PoodnaPeer;
   userId: string;
+  connectionId?: string;
+  fetchPeer(cid: string, onCreated: (peer: SimplePeerI) => void) {
+    if (this.destroyed) {
+      throw "Peer has been destroyed";
+    }
+    if (cid !== this.connectionId) {
+      this.connectionId = cid;
+      console.log("NEW PEER");
+      this.peer = new Peer({
+        channelName: Math.random().toString(),
+        initiator: true,
+        stream: this.me.localStream,
+      });
+      onCreated(this.peer);
+    } else {
+      return this.peer;
+    }
+  }
   constructor(c: { me: PoodnaPeer; userId: string }) {
     this.me = c.me;
     this.userId = c.userId;
-    this.peer = new Peer({
-      initiator: true,
-      stream: this.me.localStream,
-    });
+    console.log("CREATE OUTGOING", this.userId, this.me.user.id);
     this.me.socket.onAny(this.handleSocket.bind(this));
   }
   async handleSocket(e: AvailableEventsStr, data: SocketEventData) {
@@ -148,30 +179,37 @@ export class OutgoingHop {
     switch (data.event) {
       case AvailableEvents.signal_back: {
         this.me.logFrom(AvailableEvents.signal_back, data.fromUserId);
-        if (!this.peer.destroyed) this.peer.signal(data.payload);
+        if (this.peer && !this.peer.destroyed) {
+          console.log("TRIGGER SIGNAL BACK");
+          this.peer.signal(data.payload);
+        }
         break;
       }
     }
   }
   sendAt?: Date;
-  connectionId?: string;
+
   peer: SimplePeerI;
   send() {
+    console.log("SENDDD");
     this.sendAt = new Date();
-    this.peer.on("signal", (e) => {
-      //Make connection to peer
-      this.me.logTo(AvailableEvents.signal_to, this.userId);
-      this.me.socket.emit(SEND_DATA, {
-        event: AvailableEvents.signal_to,
-        fromUserId: this.me.user.id,
-        connection_Id: this.me.user.connectionId,
-        toUserId: this.userId,
-        payload: JSON.stringify(e),
+    const cid = Math.random().toString();
+    this.fetchPeer(cid, (peer) => {
+      peer.on("signal", (e) => {
+        //Make connection to peer
+        this.me.logTo(AvailableEvents.signal_to, this.userId);
+        this.me.socket.emit(SEND_DATA, {
+          event: AvailableEvents.signal_to,
+          fromUserId: this.me.user.id,
+          connection_id: cid,
+          toUserId: this.userId,
+          payload: JSON.stringify(e),
+        });
       });
-    });
-    this.peer.on("connect", (e) => {});
-    this.peer.on("error", (e) => {
-      this.me.logTo("ERROR:" + e, this.userId);
+      peer.on("connect", (e) => {});
+      peer.on("error", (e) => {
+        this.me.logTo("ERROR:" + e, this.userId);
+      });
     });
   }
 
@@ -179,14 +217,17 @@ export class OutgoingHop {
   healthcheck() {
     this.healthcheckintv = setInterval(() => {}, 3000);
   }
+  destroyed: boolean = false;
 
   destroy() {
+    this.destroyed = true;
     if (this.healthcheckintv) {
       clearInterval(this.healthcheckintv);
     }
     this.me.socket.offAny(this.handleSocket.bind(this));
     if (this.peer) {
       this.peer.destroy();
+      console.log("DESTROY PEER");
     }
     delete this.me.outgoings[this.userId];
   }
@@ -244,6 +285,9 @@ export class PoodnaPeer {
     }
   }
   requestSoundTo(toUserId: string) {
+    if (this.incomings[toUserId]) {
+      this.incomings[toUserId].destroy();
+    }
     //1. Generate incoming Peer
     this.incomings[toUserId] =
       this.incomings[toUserId] ||
@@ -385,14 +429,15 @@ export class PoodnaPeer {
   _log(m: string) {
     console.log(`${new Date().getTime()}:${this.user.role}:${m}`);
   }
-  logTo(m: string, toUserId: string) {
-    const u = this.get_users().find((u) => u.id === toUserId);
-    let username = u ? u?.name + "/" + u?.role : toUserId;
+  logTo(m: string, uid: string) {
+    const u = this.get_users().find((u) => u.id === uid);
+    let username = u ? u?.name + "/" + u?.role : uid;
     this._log(`TO:${username}:${m}`);
   }
-  logFrom(m: string, toUserId: string) {
-    const u = this.get_users().find((u) => u.id === toUserId);
-    let username = u ? u?.name + "/" + u?.role : toUserId;
+  logFrom(m: string, uid: string) {
+    const u = this.get_users().find((u) => u.id === uid);
+
+    let username = u ? u?.name + "/" + u?.role : uid;
     this._log(`FROM:${username}:${m}`);
   }
 }
