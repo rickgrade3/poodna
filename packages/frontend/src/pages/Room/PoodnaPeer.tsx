@@ -54,6 +54,7 @@ const MyLogic = (p: {
         role: p.role,
       },
       onConnect: () => {
+        const connectionId = Math.random().toString();
         api.ChatRoom.add_connection
           .execute({
             id: p.roomId,
@@ -77,7 +78,6 @@ const MyLogic = (p: {
     if (peer !== false) {
       pp.current = peer;
     }
-    const connectionId = Math.random().toString();
 
     return () => {
       if (peer !== true && peer !== false) {
@@ -95,8 +95,9 @@ export default () => {
     id: v.id,
     name: v.name,
     avatar: v.avatar,
-    connectionId: (r.connections?.list || []).find((d) => d.userId === v.id)
-      ?.connectionId,
+    connectionId:
+      (r.connections?.list || []).find((d) => d.userId === v.id)
+        ?.connectionId || "NONE",
     role: "MAIN_LOOP",
   }));
   const broadcasters: PoodnaPeerUser[] = (r.broadcasters?.list || []).map(
@@ -104,8 +105,9 @@ export default () => {
       id: v.id,
       name: v.name,
       avatar: v.avatar,
-      connectionId: (r.connections?.list || []).find((d) => d.userId === v.id)
-        ?.connectionId,
+      connectionId:
+        (r.connections?.list || []).find((d) => d.userId === v.id)
+          ?.connectionId || "NONE",
       role: "BROADCASTER",
     })
   );
@@ -113,8 +115,9 @@ export default () => {
     id: v.id,
     name: v.name,
     avatar: v.avatar,
-    connectionId: (r.connections?.list || []).find((d) => d.userId === v.id)
-      ?.connectionId,
+    connectionId:
+      (r.connections?.list || []).find((d) => d.userId === v.id)
+        ?.connectionId || "NONE",
     role: "LISTENER",
   }));
   const users: PoodnaPeerUser[] = _.uniqBy(
