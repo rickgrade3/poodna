@@ -24,6 +24,10 @@ export default () => {
                 id: r.item.id || "",
                 userId: appStore.user.id,
               });
+              await api.ChatRoom.add_broadcaster.execute({
+                id: r.item.id || "",
+                userId: appStore.user.id,
+              });
               appStore.push(`/room/${r.item.id}`);
               return true;
             },

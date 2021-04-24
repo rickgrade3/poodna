@@ -64,6 +64,10 @@ export class IncomingHop {
         this.peer.on("stream", (stream) => {
           this.me.logFrom("GOT STREAM", data.fromUserId);
           console.log(this.me.incomings, this.me.get_users());
+          if (this.audioEl) {
+            this.audioEl.remove();
+            this.audioEl = null;
+          }
           if (!this.audioEl) {
             this.audioEl = document.createElement("audio");
             document.getElementsByTagName("body")[0].appendChild(this.audioEl);
