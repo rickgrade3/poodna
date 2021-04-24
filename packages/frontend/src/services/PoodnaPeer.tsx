@@ -157,7 +157,9 @@ export class PoodnaPeer {
                 });
               });
               peer.on("connect", (e) => {});
-              peer.on("error", (e) => {});
+              peer.on("error", (e) => {
+                this.logFrom("ERROR:" + e, data.fromUserId);
+              });
               peer.on("stream", (stream) => {
                 this.logFrom("GOT STREAM", data.fromUserId);
                 if (!h.audioEl) {
@@ -315,7 +317,9 @@ export class PoodnaPeer {
           });
         });
         peer.on("connect", (e) => {});
-        peer.on("error", (e) => {});
+        peer.on("error", (e) => {
+          this.logTo("ERROR:" + e, userId);
+        });
       },
     });
   }
