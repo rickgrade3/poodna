@@ -53,8 +53,6 @@ export class PoodnaPeer {
       | {
           outgoing?: Hop;
           incoming?: Hop;
-          give_back_outgoing?: Hop;
-          give_back_incoming?: Hop;
         }
       | undefined;
   };
