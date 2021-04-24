@@ -41,6 +41,7 @@ type Hop =
       audioEl?: HTMLAudioElement;
       stream?: MediaStream;
       conenection_id: string;
+      activityAt: Date;
     }
   | undefined
   | null;
@@ -53,6 +54,7 @@ export class PoodnaPeer {
       | {
           outgoing?: Hop;
           incoming?: Hop;
+          createdAt: Date;
         }
       | undefined;
   };
@@ -76,6 +78,40 @@ export class PoodnaPeer {
     this._log(`FROM:${username}:${m}`);
   }
 
+  healthcheckintv: any;
+  healthcheck() {
+    this.healthcheckintv = setInterval(() => {
+      this._log("HEALTH_CHECK");
+      _.each(this.users, (u, uid) => {
+        /*
+
+          Request retry connection ถ้าเกิดยังไม่ได้ stream จาก user คนนั้น
+
+        */
+        let lastActivity = u.createdAt;
+
+        let stream;
+        if (u.incoming) {
+          lastActivity = u.incoming.activityAt;
+          stream = u.incoming.stream;
+          u.incoming.activityAt = new Date();
+        }
+        const diffSec = Math.abs(
+          (lastActivity.getTime() - lastActivity.getTime()) / 1000
+        );
+        if (diffSec > 5 && !stream) {
+          this.logTo(AvailableEvents.need_retry, uid);
+          this.socket.emit(SEND_DATA, {
+            event: AvailableEvents.need_retry,
+            conenection_id: Math.random().toString(),
+            fromUserId: this.user.id,
+            toUserId: uid,
+          });
+        }
+      });
+    }, 3000);
+  }
+
   constructor(c: PoodnaConstructor) {
     this.get_users = c.get_users;
     this.conenection_id = Math.random().toString();
@@ -93,6 +129,7 @@ export class PoodnaPeer {
       this._log(`me: ${this.user.id}`);
       this._log(`role: ${this.user.role}`);
       c.onConnect();
+      this.healthcheck();
     });
     this.socket.onAny(async (e: AvailableEventsStr, data: SocketEventData) => {
       if (!data.fromUserId) {
@@ -120,15 +157,7 @@ export class PoodnaPeer {
                 });
               });
               peer.on("connect", (e) => {});
-              peer.on("error", (e) => {
-                // this.logTo(AvailableEvents.need_retry, data.fromUserId);
-                // this.socket.emit(SEND_DATA, {
-                //   event: AvailableEvents.need_retry,
-                //   conenection_id: data.conenection_id,
-                //   fromUserId: this.user.id,
-                //   toUserId: data.fromUserId,
-                // });
-              });
+              peer.on("error", (e) => {});
               peer.on("stream", (stream) => {
                 this.logFrom("GOT STREAM", data.fromUserId);
                 if (!h.audioEl) {
@@ -225,6 +254,7 @@ export class PoodnaPeer {
       h = {
         outgoing: null,
         incoming: null,
+        createdAt: new Date(),
       };
       this.users[userId] = h;
     }
@@ -244,6 +274,7 @@ export class PoodnaPeer {
         peer: op,
         channel,
         userId,
+        activityAt: new Date(),
       };
     } else if (!outgoing && (!h.incoming || h.incoming.peer.destroyed)) {
       const channel = Math.random().toString();
@@ -257,11 +288,14 @@ export class PoodnaPeer {
         peer: op,
         channel,
         userId,
+        activityAt: new Date(),
       };
     }
     if (outgoing) {
+      this.users[userId].outgoing.activityAt = new Date();
       return this.users[userId].outgoing;
     } else {
+      this.users[userId].outgoing.activityAt = new Date();
       return this.users[userId].incoming;
     }
   }
@@ -286,6 +320,9 @@ export class PoodnaPeer {
     });
   }
   destroy() {
+    if (this.healthcheckintv) {
+      clearInterval(this.healthcheckintv);
+    }
     _.each(this.users, (v) => {
       v.incoming?.peer.destroy();
       v.outgoing?.peer.destroy();
