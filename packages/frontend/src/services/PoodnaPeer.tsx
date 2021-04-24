@@ -65,18 +65,14 @@ export class PoodnaPeer {
     console.log(`${new Date().getTime()}:${this.user.role}:${m}`);
   }
   logTo(m: string, toUserId: string) {
-    let username =
-      toUserId +
-      ":" +
-      (this.get_users().find((u) => u.id === toUserId)?.name || "-");
+    const u = this.get_users().find((u) => u.id === toUserId);
+    let username = u ? u?.name + "/" + u?.role : toUserId;
 
     this._log(`TO:${username}:${m}`);
   }
   logFrom(m: string, toUserId: string) {
-    let username =
-      toUserId +
-      ":" +
-      (this.get_users().find((u) => u.id === toUserId)?.name || "-");
+    const u = this.get_users().find((u) => u.id === toUserId);
+    let username = u ? u?.name + "/" + u?.role : toUserId;
     this._log(`FROM:${username}:${m}`);
   }
 
