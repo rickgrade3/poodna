@@ -64,4 +64,4 @@ jobs:
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: poodna-backend-service
-          cluster: dev
+          cluster: dev-fargate

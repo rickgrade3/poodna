@@ -1,50 +1,73 @@
 {
-  "requiresCompatibilities": ["EC2"],
+  "ipcMode": null,
   "containerDefinitions": [
     {
-      "name": "server",
-      "image": "",
-      "memoryReservation": "128",
-      "resourceRequirements": null,
-      "essential": true,
-      "portMappings": [
-        {
-          "hostPort": "0",
-          "containerPort": "9002",
-          "protocol": "tcp"
-        }
-      ],
-      "environment": null,
-      "environmentFiles": [],
-      "secrets": null,
-      "mountPoints": null,
-      "volumesFrom": null,
-      "hostname": null,
-      "user": null,
-      "workingDirectory": null,
-      "extraHosts": null,
+      "dnsSearchDomains": null,
+      "environmentFiles": null,
       "logConfiguration": {
         "logDriver": "awslogs",
+        "secretOptions": null,
         "options": {
-          "awslogs-group": "log",
+          "awslogs-group": "/ecs/poodna-backend-fg",
           "awslogs-region": "ap-southeast-1",
           "awslogs-stream-prefix": "ecs"
         }
       },
+      "entryPoint": null,
+      "portMappings": [
+        {
+          "hostPort": 9002,
+          "protocol": "tcp",
+          "containerPort": 9002
+        }
+      ],
+      "command": null,
+      "linuxParameters": null,
+      "cpu": 0,
+      "environment": [],
+      "resourceRequirements": null,
       "ulimits": null,
-      "dockerLabels": null,
+      "dnsServers": null,
+      "mountPoints": [],
+      "workingDirectory": null,
+      "secrets": null,
+      "dockerSecurityOptions": null,
+      "memory": null,
+      "memoryReservation": null,
+      "volumesFrom": [],
+      "stopTimeout": null,
+      "image": "",
+      "startTimeout": null,
+      "firelensConfiguration": null,
       "dependsOn": null,
-      "repositoryCredentials": {
-        "credentialsParameter": ""
-      }
+      "disableNetworking": null,
+      "interactive": null,
+      "healthCheck": null,
+      "essential": true,
+      "links": null,
+      "hostname": null,
+      "extraHosts": null,
+      "pseudoTerminal": null,
+      "user": null,
+      "readonlyRootFilesystem": null,
+      "dockerLabels": null,
+      "systemControls": null,
+      "privileged": null,
+      "name": "server"
     }
   ],
-  "volumes": [],
-  "networkMode": null,
-  "memory": "128",
-  "cpu": null,
   "placementConstraints": [],
-  "tags": [],
-  "family": "batch",
-  "taskRoleArn": ""
+  "memory": "512",
+  "taskRoleArn": null,
+  "compatibilities": ["EC2", "FARGATE"],
+  "family": "poodna-backend-fg",
+  "pidMode": null,
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc",
+  "cpu": "256",
+  "revision": 1,
+  "status": "ACTIVE",
+  "inferenceAccelerators": null,
+  "proxyConfiguration": null,
+  "volumes": []
 }
