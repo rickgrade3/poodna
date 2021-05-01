@@ -56,7 +56,7 @@ jobs:
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: packages/backend/task-definition.json
+          task-definition: packages/backend/task-definition-fg.json
           container-name: server
           image: ${{ steps.build-image.outputs.image }}
       - name: Deploy Amazon ECS task definition
@@ -64,4 +64,4 @@ jobs:
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: poodna-backend-service
-          cluster: dev
+          cluster: dev-fargate
